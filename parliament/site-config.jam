@@ -1,0 +1,46 @@
+
+import os ;
+
+project site-config ;
+
+path-constant BdbDir : [ os.environ BDB_HOME ] ;
+path-constant BoostDir : [ os.environ BOOST_ROOT ] ;
+path-constant JavaDir : [ os.environ JAVA_HOME ] ;
+
+constant COMPILER : gcc ;
+
+alias BoostHeaderOnlyLibraries
+	:	# no sources
+	:	# no build requirements
+	:	# no default build
+	:	<include>$(BoostDir)/boost/tr1/tr1
+		<include>$(BoostDir)
+	;
+
+searched-lib BoostUnitTest
+	:	# no sources
+	:	<variant>debug:<name>boost_unit_test_framework-$(COMPILER)-mt-d
+		<variant>release:<name>boost_unit_test_framework-$(COMPILER)-mt
+		<address-model>32:<search>$(BoostDir)/gcc-32/stage/lib
+		<address-model>64:<search>$(BoostDir)/gcc-64/stage/lib
+	:	# no default build
+	:	<include>$(BoostDir)
+		<define>BOOST_TEST_DYN_LINK
+	;
+
+alias JavaJNI
+	:	# no sources
+	:	# no build requirements
+	:	# no default build
+	:	<include>$(JavaDir)/include
+	:	<include>$(JavaDir)/include/linux
+	;
+
+lib BerkeleyDB
+	:	# no sources
+	:	<name>db
+		<address-model>32:<search>$(BdbDir)/32/lib
+		<address-model>64:<search>$(BdbDir)/64/lib
+	:	# no default build
+	:	<include>$(BdbDir)/64/include
+	;
