@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GeoSparql Query visualization</title>
+    <style type='text/css'>
+      .bigmap {
+      height: 512px;
+      width: 1024px;
+      }
+      li{
+      list-style: none;
+      }
+  	.ui-layout-center { overflow: hidden; }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/jquery-ui/themes/smoothness/jquery.ui.all.css" />
+    <link rel="stylesheet" type="text/css" href="/static/layout-default.css" />
+    <script type="text/javascript" src="/static/jquery-latest.js"></script>
+    <script type="text/javascript" src="/static/jquery-ui-latest.js"></script>
+    <script type="text/javascript" src="/static/jquery.layout-latest.js"></script>
+    <script type="text/javascript" src="/static/lib/OpenLayers.js"></script>
+    <script type="text/javascript" src="/static/app.js"></script>
+    <script type="text/javascript">
+      var myLayout;
+      var map;
+      var vectors;
+      $(document).ready(function () {
+      $('body').layout();
+      $("#tabs_div").tabs();
+      $(".header-footer").hover(
+			function(){ $(this).addClass('ui-state-hover'); }
+		,	function(){ $(this).removeClass('ui-state-hover'); }
+		);
+
+      });
+      $(function() {
+		$( "input:submit, a, button", ".demo" ).button();
+		$(".demo").click(function() { $('#query1').dialog('open'); return false; });
+      $( "#query1" ).dialog({
+			modal: true,
+                        autoOpen: false,
+                        width: "auto",
+		});
+	});
+    </script>
+  </head>
+  <body onload="init()">
+    <div id="tabs_div" class="ui-layout-center">
+      <ul style="-moz-border-radius-bottomleft: 0; -moz-border-radius-bottomright: 0;">
+	<li><a href="#tab_1"><span>Map Results</span></a></li>
+	<li><a href="#tab_2"><span>Tabular Results</span></a></li>
+      </ul>
+      <div class="ui-layout-content ui-widget-content ui-corner-bottom" style="border-top:0; padding-bottom: 1em;">
+	<div id="tab_1">
+	  <div id='map' class='bigmap'></div>
+	</div>
+	<div id="tab_2">
+	  <h3>No results yet</h3>
+	</div>
+      </div>
+      
+    </div>
+    <div class="ui-layout-west">
+      <h3>Select a query:</h3>
+      <div class="demo">
+	<button>Query #1</button>
+      </div>
+      <div id="query1" title="Query #1">
+	<form onsubmit="$('#query1').dialog('close'); submitquery(); return false;">
+	  {% csrf_token %}
+	  <textarea name="query" id="queryarea" cols="90" rows="10" spellcheck="false">
+ 	    SELECT DISTINCT
+	    *
+	    WHERE {
+        	    GRAPH <http://cegis.usgs.gov/rdf/> {
+	            ?sub <http://www.opengis.net/def/geosparql/asWKT> ?wkt .
+         	      }
+	   } LIMIT 10
+	  </textarea>
+	  <br />
+	  <input type="submit" value="Submit Query" />
+	</form>
+      </div>
+    </div>
+</body>
+</html>

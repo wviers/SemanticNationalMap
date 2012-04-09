@@ -1,0 +1,90 @@
+/*
+		 *	GLOBAL LAYOUT STYLES
+		 */
+		.ui-layout-content {
+			overflow:		auto; /* add scrolling to content-divs (panel-wrappers) */
+			border-top:		0 !important; /* tab-buttons above this DIV already has a border-bottom */
+		}
+
+		/*
+		 *	TAB-THEME ADJUSTMENTS
+		 */
+		.ui-tabs-nav li {
+			white-space:	nowrap;
+		}
+		.ui-tabs-nav li a {
+			font-size:		1em !important;
+			padding:		4px 1.5ex 3px !important;
+		}
+		.ui-tabs-panel {
+			font-size:		1em !important;
+			padding:		0 1em !important;
+		}
+
+		/*
+		 *	WEST-PANE TABS
+		 *
+		 *	These tabs 'fill' the pane,
+		 *	so the pane-border acts as the tab-border
+		 */
+		.ui-layout-pane-west {
+			padding:	0;
+			overflow:	hidden;
+			}
+			.ui-layout-pane-west .ui-tabs-nav {
+				/* don't need border or rounded corners - tabs 'fill' the pane */
+				border-top:		0;
+				border-left:	0;
+				border-right:	0;
+				padding-bottom:	0 !important;
+				-moz-border-radius:		0;
+				-webkit-border-radius:	0;
+			}
+
+		/*
+		 *	CENTER-PANE TABS
+		 *
+		 *	These tabs have white-space around them,
+		 *	so the content-div provides the border for the tabs
+		 */
+		.ui-layout-pane-center {
+			background:	#FFD; /* to make pane background stand-out */
+			padding:	10px;
+			overflow:	hidden;
+			}
+			.ui-layout-pane-center .ui-tabs-nav {
+				/* remove rounded corners from bottom of 'tabs'*/
+				-moz-border-radius-bottomleft:		0;
+				-moz-border-radius-bottomright:		0;
+				-webkit-border-bottom-left-radius:	0;
+				-webkit-border-bottom-right-radius:	0;
+			}
+
+		/*
+		 *	EAST-PANE TABS
+		 *
+		 *	These are ordinary tabs - entire pane scrolls
+		 */
+		.ui-layout-pane-east {
+			background:	#EFE; /* to make pane background stand-out */
+			padding:	10px;
+			overflow:	auto; /* scroll - tab-panels taller than pane - without content-div */
+			}
+			.ui-layout-pane-east .ui-tabs-nav {
+				/* remove rounded corners from bottom of 'tabs'*/
+				-moz-border-radius-bottomleft:		0;
+				-moz-border-radius-bottomright:		0;
+				-webkit-border-bottom-left-radius:	0;
+				-webkit-border-bottom-right-radius:	0;
+			}
+			.ui-layout-pane-east .ui-tabs-panel {
+				background:	#FFF;			/* ui-tab-panel class removes ui-widget-content background - restore it */
+				border:		1px solid #AAA;	/* ditto for the ui-widget-content border */
+				border-top-color:	#FFF;
+			}
+
+		div.buttons {
+			float:			right;
+			margin-right:	200px;
+			margin-top:		0;
+		}
