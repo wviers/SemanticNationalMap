@@ -6,21 +6,26 @@ from rdflib.graph import Graph, ConjunctiveGraph
 from rdflib import URIRef, Namespace
 from rdflib.term import Literal
 from rdflib.term import URIRef
+import sys
 
 nhd = Namespace('http://cegis.usgs.gov/rdf/nhd/')
 nhdf = Namespace('http://cegis.usgs.gov/rdf/nhd/Features/')
 nhdg = Namespace('http://cegis.usgs.gov/rdf/nhd/Geometries/')
 gnis = Namespace('http://cegis.usgs.gov/rdf/gnis/')
-geo = Namespace('http://opengis.net/ont/OGC-GeoSPARQL/1.0/')
+geo = Namespace('http://www .opengis.net/def/geosparql/')
+geof = Namespace('http://www.opengis.net/def/geosparql/function/')
+sf = Namespace('http://www.opengis.net/def/sf/')
+gml = Namespace('http://www.opengis.net/def/gml/')
 rdf = Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#')
 
 int_type =  '^^<http://www.w3.org/2001/XMLSchema#int>'
 string_type = '^^<http://www.w3.org/2001/XMLSchema#string>'
+wkt_type = 'http://www.opengis.net/def/sf/wktLiteral'
 
 layer_models = {}
 
 layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf['points/'], 'ComID'), 
-'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
+                            'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
                              'TYPE': nhd['point'],
                              'FCode': (nhd['fCode'], nhd['fCode/{0}']),
                              'FDate': (nhd['fDate'], '{0}', str),
@@ -73,6 +78,7 @@ layer_models['NHDWaterBody'] = {'ID_URI_TEMPLATE': (nhdf['waterBody/'], 'ComID')
                                 'AreaSqKm': (nhd['areaSqKM'], '{0}', float),
                                 }
 
+
 def InsertFeature(feature, model, store):
     feature_uri = model['ID_URI_TEMPLATE'][0]
     subject_field = model['ID_URI_TEMPLATE'][1]
@@ -95,7 +101,7 @@ def InsertFeature(feature, model, store):
                 obj = URIRef(v[1].format(f_val))
             store.add((URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
             
-    wkt = Literal(feature.GetGeometryRef().ExportToWkt(), datatype=u'http://www.opengis.net/def/dataType/OGC-SF/1.0/WKTLiteral')
+    wkt = Literal(feature.GetGeometryRef().ExportToWkt(), datatype=wkt_type)
     #    gml = Literal(feature.GetGeometryRef().ExportToGML(), datatype=u'http://www.opengis.net/def/dataType/OGC-GML/3.2/GMLLiteral')
     store.add((URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
     store.add((URIRef(feature_uri), rdf['type'], model['TYPE']))
@@ -120,11 +126,11 @@ def ConvertMdbToN3(mdb_filename, n3_filename):
     store = ConjunctiveGraph(identifier='temp')
 
     # bind namespaces
-    store.bind('nhd', 'http://cegis.usgs.gov/rdf/nhd/')
-    store.bind('nhdf', 'http://cegis.usgs.gov/rdf/nhd/Features/')
-    store.bind('nhdg', 'http://cegis.usgs.gov/rdf/nhd/Geometries/')
-    store.bind('gnis', 'http://cegis.usgs.gov/rdf/gnis/')
-    store.bind('geo', 'http://opengis.net/ont/OGC-GeoSPARQL/1.0/')
+    store.bind('nhd', nhd)
+    store.bind('nhdf', nhdf)
+    store.bind('nhdg', nhdg)
+    store.bind('gnis', gnis)
+    store.bind('geo', geo)
 
     
     layers = [ds.GetLayer(i) for i in range(0, ds.GetLayerCount())]
@@ -142,3 +148,6 @@ def ConvertMdbToN3(mdb_filename, n3_filename):
     return True
 			
     
+if __name__ == '__main__':
+    if len(sys.argv) >= 3:
+        ConvertMdbToN3(sys.argv[1], sys.argv[2])
