@@ -213,8 +213,8 @@ function updatemap(resultMsg)
     var features = new Array();
     var bounds;
     var options = {
-        'internalProjection': map.baseLayer.projection,
-        'externalProjection': new OpenLayers.Projection('EPSG:4326')
+        'internalProjection': map.baseLayer.projection, 
+        'externalProjection': new OpenLayers.Projection('EPSG:4269')
     };   
     var parser = new OpenLayers.Format.WKT(options);
 
@@ -227,7 +227,14 @@ function updatemap(resultMsg)
 	    return true;
 	}
 
-	var feat = parser.read(wkt['value']);
+	// Remove CRS from from of wkt
+	var wkt2 = wkt['value'];
+	if (wkt2.split(/\>/)[1] != undefined) {
+	    wkt2 = wkt2.split(/\>/)[1];
+	}
+
+
+	var feat = parser.read(wkt2);
 	if (feat != undefined) {
 	    features.push(feat);	    
 	}
