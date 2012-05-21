@@ -4,83 +4,107 @@
     <title>GeoSparql Query visualization</title>
     <style type='text/css'>
       .bigmap {
-      height: 512px;
-      width: 1024px;
+      height: 100%;
+      width: 100%;
       }
       li{
       list-style: none;
       }
   	.ui-layout-center { overflow: hidden; }
+      .ui-layout-north ul ul {
+		/* Drop-Down */
+		bottom:		auto;
+		margin:		0;
+		margin-top:	1.45em;
     </style>
-    <link rel="stylesheet" type="text/css" href="/static/jquery-ui/themes/smoothness/jquery.ui.all.css" />
-    <link rel="stylesheet" type="text/css" href="/static/layout-default.css" />
-    <script type="text/javascript" src="/static/jquery-latest.js"></script>
-    <script type="text/javascript" src="/static/jquery-ui-latest.js"></script>
-    <script type="text/javascript" src="/static/jquery.layout-latest.js"></script>
-    <script type="text/javascript" src="/static/lib/OpenLayers.js"></script>
-    <script type="text/javascript" src="/static/lib/proj4js.js"></script>
-    <script type="text/javascript" src="/static/app.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}jquery-ui/themes/smoothness/jquery.ui.all.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}layout-default.css" />
+
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery-latest.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery-ui-latest.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery.layout-latest.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}OpenLayers.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}proj4js.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}app.js"></script>
     <script type="text/javascript">
       var myLayout;
       var map;
       var vectors;
+
       $(document).ready(function () {
-      $('body').layout();
-      $("#tabs_div").tabs();
+      myLayout = $('body').layout();
       $(".header-footer").hover(
 			function(){ $(this).addClass('ui-state-hover'); }
 		,	function(){ $(this).removeClass('ui-state-hover'); }
 		);
+      myLayout.sizePane("north", 70);
+      myLayout.resizeAll();
 
       });
       $(function() {
-		$( "input:submit, a, button", ".demo" ).button();
+		$( "input:submit, a, button", ".demo").button();
+		$( "input:submit, a, button", ".results").button();
 		$(".demo").click(function() { $('#query1').dialog('open'); return false; });
+                $(".results").click(function() { $('#tab_2').dialog('open'); return false; });
       $( "#query1" ).dialog({
 			modal: true,
                         autoOpen: false,
                         width: "auto",
 		});
+      $( "#tab_2").dialog({
+                        modal: true,
+                        autoOpen: false,
+                        width: "auto",
+                });
 	});
     </script>
   </head>
   <body onload="init()">
     <div id="tabs_div" class="ui-layout-center">
-      <ul style="-moz-border-radius-bottomleft: 0; -moz-border-radius-bottomright: 0;">
-	<li><a href="#tab_1"><span>Map Results</span></a></li>
-	<li><a href="#tab_2"><span>Tabular Results</span></a></li>
-      </ul>
       <div class="ui-layout-content ui-widget-content ui-corner-bottom" style="border-top:0; padding-bottom: 1em;">
-	<div id="tab_1">
-	  <div id='map' class='bigmap'></div>
-	</div>
-	<div id="tab_2">
-	  <h3>No results yet</h3>
-	</div>
+	<div id='map' class='bigmap'></div>
       </div>
       
     </div>
-    <div class="ui-layout-west">
-      <h3>Select a query:</h3>
-      <div class="demo">
-	<button>Query #1</button>
+    <div class="ui-layout-north">
+      <div class="demo" style="float: left;">
+	<button>SPARQL Query</button>
       </div>
-      <div id="query1" title="Query #1">
+      <div id="query1" title="SPARQL Query">
 	<form onsubmit="$('#query1').dialog('close'); submitquery(); return false;">
 	  {% csrf_token %}
-	  <textarea name="query" id="queryarea" cols="90" rows="10" spellcheck="false">
- 	    SELECT DISTINCT
-	    *
-	    WHERE {
-        	    GRAPH <http://cegis.usgs.gov/rdf/> {
-	            ?sub <http://www.opengis.net/def/geosparql/asWKT> ?wkt .
-         	      }
-	   } LIMIT 10
+	  <textarea name="query" id="queryarea" cols="90" rows="20" spellcheck="false">
+PREFIX geo: <http://www.opengis.net/def/geosparql/> 
+PREFIX geof: <http://www.opengis.net/def/geosparql/function/>
+PREFIX geo-sf: <http://www.opengis.net/def/sf/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX gnis: <http://cegis.usgs.gov/rdf/gnis/> 
+PREFIX gnisf: <http://cegis.usgs.gov/rdf/gnis/Features/>
+PREFIX nhd: <http://cegis.usgs.gov/rdf/nhd/> 
+PREFIX nhdf: <http://cegis.usgs.gov/rdf/nhd/Features/> 
+PREFIX gu: <http://cegis.usgs.gov/rdf/gu/>
+PREFIX guf: <http://cegis.usgs.gov/rdf/gu/Features/>
+PREFIX category: <http://dbpedia.org/class/yago/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT 
+WHERE {
+    
+}
 	  </textarea>
 	  <br />
 	  <input type="submit" value="Submit Query" />
+	  <input type="reset" value="Reset form" />
 	</form>
       </div>
+      <div class="results" style="float:left;">
+	<button>Tabular Results</button>
+      </div>
+      <div id="tab_2">
+	<h3>No results yet</h3>
+      </div>
+      
     </div>
-</body>
+  </body>
 </html>

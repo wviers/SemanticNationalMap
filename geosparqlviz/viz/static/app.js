@@ -196,8 +196,13 @@ function updatetable(resultMsg)
     for (var j=0; j < resultMsg['results']['bindings'].length; ++j) {
 	$tr = $('<tr>');
 	for (var key in resultMsg['results']['bindings'][j]) {
-	    var bindings = resultMsg['results']['bindings'];
-	    $tr.append($('<td>').text(bindings[j][key].value));
+            if (key == "wkt") {
+		var bindings = resultMsg['results']['bindings'];
+		$tr.append($('<td>').text(bindings[j][key].value.substring(0, 100) + '...'));
+	    } else {
+		var bindings = resultMsg['results']['bindings'];
+		$tr.append($('<td>').text(bindings[j][key].value));
+	    }
 	}
 	$tbl.append($tr);
     }
@@ -250,6 +255,58 @@ function updatemap(resultMsg)
     
     vectors.addFeatures(features);
     map.zoomToExtent(bounds);
+    /*
+    var overCallback = { over: featureOver, out: hideTooltip };
+    var layers = map.getLayersByClass('OpenLayers.Layer.Vector');
+    var selectControl = new OpenLayers.Control.SelectFeature(layers,
+							     { callbacks: overCallback });
+    selectControl.onSelect = function(feature) {
+        if (feature.attributes.clickable != 'off') alert('Feature!');
+    };
+    map.addControl(selectControl);
+    selectControl.activate();
+    function featureOver(feature) {
+            // 'this' is selectFeature control
+            var fname = feature.attributes.name || feature.attributes.title || feature.attributes.id || feature.fid;
+            if (feature.geometry.CLASS_NAME == "OpenLayers.Geometry.LineString") {
+                fname += ' '+ Math.round(feature.geometry.getGeodesicLength(feature.layer.map.baseLayer.projection) * 0.1) / 100 + 'km';
+            }
+            var xy = this.map.getControl('ll_mouse').lastXy || { x: 0, y: 0 };
+            showTooltip(fname, xy.x, xy.y);
+        }
+
+        function getViewport() {
+            var e = window, a = 'inner';
+            if ( !( 'innerWidth' in window ) ) {
+                a = 'client';
+                e = document.documentElement || document.body;
+            }
+            return { width : e[ a+'Width' ], height : e[ a+'Height' ] };
+        }
+        function showTooltip(ttText, x, y) {
+            var windowWidth = getViewport().width;
+            var o = document.getElementById('tooltip');
+            o.innerHTML = ttText;
+            if(o.offsetWidth) {
+                var ew = o.offsetWidth;
+            } else if(o.clip.width) {
+                var ew = o.clip.width;
+            }
+            y = y + 16;
+            x = x - (ew / 4);
+            if (x < 2) {
+                x = 2;
+            } else if(x + ew > windowWidth) {
+                x = windowWidth - ew - 4;
+            }
+            o.style.left = x + 'px';
+            o.style.top = y + 'px';
+            o.style.visibility = 'visible';
+        }
+        function hideTooltip() {
+            document.getElementById('tooltip').style.visibility = 'hidden';
+        }
+     */
 
     return true;
 }

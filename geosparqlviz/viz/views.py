@@ -32,6 +32,8 @@ def sparqlproxy(request, path, target_url):
     
 
 def loadindex(request):
-    c = {}
+    c = RequestContext(request)
+    t = loader.get_template('index.html')
     c.update(csrf(request))
-    return render_to_response('index.html', c)
+    return HttpResponse(t.render(c))
+
