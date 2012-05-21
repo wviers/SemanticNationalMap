@@ -14,6 +14,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
+    (r'^$', 'viz.views.loadindex'),
     (r'^viz/$', 'viz.views.loadindex'),
     (r'^sparql(?P<path>.*)$', 'viz.views.sparqlproxy', {'target_url': 'http://usgs-ybother.srv.mst.edu:8890/parliament/sparql'}),
     (r'^viz/sparql(?P<path>.*)$', 'viz.views.sparqlproxy', {'target_url': 'http://usgs-ybother.srv.mst.edu:8890/parliament/sparql'}),
