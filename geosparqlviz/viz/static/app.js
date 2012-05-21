@@ -316,7 +316,7 @@ function submitquery()
 
     var request = $.ajax({
 			     type: "GET",
-			     url: "sparql",
+			     url: "/parliament/sparql",
 			     data: {
 				 "query": $("#queryarea").val(),
 				 "output": "json"
