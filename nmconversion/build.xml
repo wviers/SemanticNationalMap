@@ -34,7 +34,7 @@
   <echo>Adding files to jar...</echo>
     <jar destfile="nm2rdf.jar" update="true">
         <fileset dir="${basedir}">
-            <include name="python/*"/>
+            <include name="python/**/*"/>
         </fileset>
         <manifest>
           <attribute name="Main-Class" value="gov.usgs.cegis.nationalmap2rdf.Main" />
