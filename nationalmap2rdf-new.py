@@ -6,11 +6,30 @@ import sys, os
 from struct import unpack, unpack_from, pack_into, pack
 import StringIO
 import array
-import shapefile
 from java.awt import Component, GridLayout
 from javax.swing import (BoxLayout, ImageIcon, JButton, JFrame, JPanel,
         JPasswordField, JLabel, JTextArea, JTextField, JScrollPane,
         SwingConstants, WindowConstants, JFileChooser, JOptionPane)
+
+import java.lang.ClassLoader 
+import java.io.InputStreamReader
+import java.io.BufferedReader
+
+loader = java.lang.ClassLoader.getSystemClassLoader()
+stream = loader.getResourceAsStream("/python/shapefile.py")
+print(stream)
+reader = java.io.BufferedReader(java.io.InputStreamReader(stream))
+
+script = ""                          
+line = reader.readLine()
+while (line != None) : 
+    script += line + "\n"
+    line = reader.readLine()
+
+exec(script)
+
+import shapefile
+
 
 # Constants for shape types
 NULL = 0
