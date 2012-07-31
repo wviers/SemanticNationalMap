@@ -9,7 +9,8 @@ import array
 from java.awt import Component, GridLayout
 from javax.swing import (BoxLayout, ImageIcon, JButton, JFrame, JPanel,
         JPasswordField, JLabel, JTextArea, JTextField, JScrollPane,
-        SwingConstants, WindowConstants, JFileChooser, JOptionPane)
+        SwingConstants, WindowConstants, JFileChooser, JOptionPane,
+        JProgressBar, JDialog)
 
 import shapefile
 from rdflib.graph import Graph, ConjunctiveGraph
@@ -496,14 +497,59 @@ layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
 
+def InsertFeature(feature, model, store):
+    feature_uri = model['ID_URI_TEMPLATE'][0]
+    subject_field = model['ID_URI_TEMPLATE'][1]
+    feature_uri = feature_uri + unicode(feature[subject_field])
+    geometry_uri = model['GEOMETRY_URI_TEMPLATE'][0]
+    geometry_field = model['GEOMETRY_URI_TEMPLATE'][1]
+    geometry_uri = geometry_uri + unicode(feature[geometry_field])
+    
+    for k,v in model.iteritems():
+        f_val = feature[k]
+        if f_val == None or f_val == ' ':
+            continue
+        elif len(v) == 3:
+            obj = Literal(v[2](v[1].format(f_val)))
+        else:
+            obj = URIRef(v[1].format(str(int(f_val))))
 
+        store.add((URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
+            
+    wkt = Literal(binary_shape_to_wkt(feature['Shape']))
+    store.add((URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
+    store.add((URIRef(feature_uri), rdf['type'], model['TYPE']))
+    # Create Geometry 
+    store.add((URIRef(geometry_uri), geo['asWKT'], wkt))
+    store.add((URIRef(geometry_uri), rdf['type'], geo['Geometry']))
 
+    return True
 
+def InsertLayer(layer, store):
+    if layer.getName() in layer_models:
+        model = layer_models[layer.getName()]
+        for feature in layer:
+            InsertFeature(feature, model, store)
 
 def nm_mdb_to_n3(inputFile, outputFile):
     f = File(inputFile)
     o = open(outputFile, 'w')
+    store = ConjunctiveGraph(identifier='temp')
     
+     # bind namespaces
+    store.bind('nhd', nhd)
+    store.bind('nhdf', nhdf)
+    store.bind('nhdg', nhdg)
+    store.bind('gnis', gnis)
+    store.bind('geo', geo)
+    store.bind('trans', trans)
+    store.bind('transf', transf)
+    store.bind('transg', transg)
+    store.bind('rdfs', rdfs)
+    store.bind('gu', gu)
+    store.bind('struct', struct)
+    store.bind('hu', hu)
+
     if f.exists() == False:
         print("Error opening file.")
         return False
@@ -512,17 +558,12 @@ def nm_mdb_to_n3(inputFile, outputFile):
     except IOException:
         print("Error opening database.")
         return False
-    tables = d.getTableNames()
+
 
     for table in d:
-        print(table.getName())
-        for r in table:
-            shape = r['Shape']
-            if shape:
-                wkt = binary_shape_to_wkt(shape)
-                o.write(wkt)
+        InsertLayer(table, store)
 
-    return true
+    return True
 
 class ConversionGUI(object):
     def __init__(self):
@@ -564,7 +605,24 @@ class ConversionGUI(object):
         self.outputFile = self.outputField.getText()
 
     def convert(self, event):
-        if nm_mdb_to_n3(self.inputFile, self.outputFile): 
+        progressBar = JProgressBar()
+        progressBar.setIndeterminate(True)
+        workLabel = JLabel('Working...')
+        center_panel = JPanel()
+        center_panel.add(workLabel)
+        center_panel.add(progressBar)
+        
+        workingDialog = JDialog(None, "Working...")
+        workingDialog.getContentPane().add(center_panel)
+        workingDialog.pack()
+        workingDialog.setVisible(True)
+        ret_val = nm_mdb_to_n3(self.inputFile, self.outputFile)
+        workingDialog.setVisible(False)
+        
+        self.convertPanel.remove(progressBar)
+        self.convertPanel.validate()
+        
+        if ret_val:
             JOptionPane.showMessageDialog(self.convertPanel, "Conversion Successful!.");
         else:
             JOptionPane.showMessageDialog(self.convertPanel, "Conversion Failed!.");
