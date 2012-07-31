@@ -6,7 +6,7 @@ import sys, os
 from struct import unpack, unpack_from, pack_into, pack
 import StringIO
 import array
-from java.awt import Component, GridLayout
+from java.awt import Component, GridLayout, Dimension
 from javax.swing import (BoxLayout, ImageIcon, JButton, JFrame, JPanel,
         JPasswordField, JLabel, JTextArea, JTextField, JScrollPane,
         SwingConstants, WindowConstants, JFileChooser, JOptionPane,
@@ -161,7 +161,7 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
                                 }
 
 layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
-                           'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
+                           'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                            'TYPE': nhd['area'],
                            'FDate': (nhd['fDate'], '{0}', unicode),
                            'FCode': (nhd['fCode'], nhd['fCode/{0}']),
@@ -527,16 +527,14 @@ def InsertFeature(feature, model, store):
 
 def InsertLayer(layer, store):
     if layer.getName() in layer_models:
+        print('  Model found')
         model = layer_models[layer.getName()]
         for feature in layer:
             InsertFeature(feature, model, store)
 
-def nm_mdb_to_n3(inputFile, outputFile):
-    f = File(inputFile)
-    o = open(outputFile, 'w')
-    store = ConjunctiveGraph(identifier='temp')
-    
-     # bind namespaces
+
+def load_namespaces(store):
+    # bind namespaces
     store.bind('nhd', nhd)
     store.bind('nhdf', nhdf)
     store.bind('nhdg', nhdg)
@@ -549,7 +547,12 @@ def nm_mdb_to_n3(inputFile, outputFile):
     store.bind('gu', gu)
     store.bind('struct', struct)
     store.bind('hu', hu)
-
+    
+def nm_mdb_to_n3(inputFile, outputFile):
+    f = File(inputFile)
+    o = open(outputFile, 'w')
+    store = ConjunctiveGraph(identifier='temp')
+    
     if f.exists() == False:
         print("Error opening file.")
         return False
@@ -561,7 +564,15 @@ def nm_mdb_to_n3(inputFile, outputFile):
 
 
     for table in d:
+        store = ConjunctiveGraph(identifier='temp')
+        load_namespaces(store)
+        print('Processing table: ' + table.getName())
         InsertLayer(table, store)
+        if len(store) > 0:
+            store.serialize(destination=outputFile+table.getName(), format='n3')
+        store = None
+    print('All tables processed')
+    
 
     return True
 
@@ -571,6 +582,8 @@ class ConversionGUI(object):
                             defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE)
 
         self.convertPanel = JPanel(GridLayout(0,3))
+        self.frame.setPreferredSize(Dimension(500, 200))
+        self.frame.setMaximumSize(Dimension(800, 600))
 
         self.frame.add(self.convertPanel)
 
@@ -605,6 +618,7 @@ class ConversionGUI(object):
         self.outputFile = self.outputField.getText()
 
     def convert(self, event):
+        ret_val = False
         progressBar = JProgressBar()
         progressBar.setIndeterminate(True)
         workLabel = JLabel('Working...')
@@ -615,12 +629,12 @@ class ConversionGUI(object):
         workingDialog = JDialog(None, "Working...")
         workingDialog.getContentPane().add(center_panel)
         workingDialog.pack()
+        
         workingDialog.setVisible(True)
         ret_val = nm_mdb_to_n3(self.inputFile, self.outputFile)
         workingDialog.setVisible(False)
+
         
-        self.convertPanel.remove(progressBar)
-        self.convertPanel.validate()
         
         if ret_val:
             JOptionPane.showMessageDialog(self.convertPanel, "Conversion Successful!.");
