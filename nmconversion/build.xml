@@ -36,6 +36,10 @@
         <fileset dir="${basedir}">
             <include name="python/*"/>
         </fileset>
+        <manifest>
+          <attribute name="Main-Class" value="gov.usgs.cegis.nationalmap2rdf.Main" />
+        </manifest>
+          
     </jar>
    </target>
 
