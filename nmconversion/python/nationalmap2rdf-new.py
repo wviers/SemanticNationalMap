@@ -38,7 +38,7 @@ def create_point(point_list):
     wkt = 'POINT ( '
     
     for c in point_list:
-        wkt += str(c)
+        wkt += ' {0}'.format(c)
 
     wkt += ' )'
 
