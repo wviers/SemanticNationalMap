@@ -679,6 +679,7 @@ class Graph(Node):
             if netloc!="":
                 print "WARNING: not saving as location is not a local file reference"
                 return
+            path = location
             name = tempfile.mktemp()
             stream = open(name, 'wb')
             serializer.serialize(stream, base=base, encoding=encoding, **args)
