@@ -551,7 +551,6 @@ def load_namespaces(store):
 def nm_mdb_to_n3(inputFile, outputFile):
     f = File(inputFile)
     #    o = open(outputFile, 'w')
-    print("Got this output filename: " + outputFile)
     store = ConjunctiveGraph(identifier='temp')
     
     if f.exists() == False:
