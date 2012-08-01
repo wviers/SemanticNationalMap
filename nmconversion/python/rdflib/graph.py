@@ -686,6 +686,7 @@ class Graph(Node):
             if hasattr(shutil,"move"):
                 shutil.move(name, path)
             else:
+                print("Copying to: " + path)
                 shutil.copy(name, path)
                 os.remove(name)
 
