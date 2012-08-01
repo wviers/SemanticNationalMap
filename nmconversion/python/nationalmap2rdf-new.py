@@ -609,10 +609,10 @@ class ConversionGUI(object):
     def selectFile(self, event):
         fc = JFileChooser()
         fc.showOpenDialog(self.frame)
-        self.inputFile = fc.getSelectedFile().getAbsolutePath()
+        self.inputFile = fc.getSelectedFile().getCanonicalPath()
         self.inputField.setText(self.inputFile)
         suggestedOutputFile = self.inputFile
-        #        suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
+        suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
         
         self.outputField.setText(suggestedOutputFile + '.n3')
         self.outputFile = self.outputField.getText()
