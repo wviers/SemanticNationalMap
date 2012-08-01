@@ -609,7 +609,7 @@ class ConversionGUI(object):
     def selectFile(self, event):
         fc = JFileChooser()
         fc.showOpenDialog(self.frame)
-        self.inputFile = fc.getSelectedFile().getPath()
+        self.inputFile = fc.getSelectedFile().getAbsolutePath()
         self.inputField.setText(self.inputFile)
         suggestedOutputFile = self.inputFile
         #        suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
