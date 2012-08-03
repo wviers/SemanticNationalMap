@@ -6,11 +6,12 @@ import sys, os
 from struct import unpack, unpack_from, pack_into, pack
 import StringIO
 import array
-from java.awt import Component, GridLayout, Dimension
+from   java.awt.event import ActionListener;
+from java.awt import Component, GridLayout, Dimension, BorderLayout
 from javax.swing import (BoxLayout, Box, ImageIcon, JButton, JFrame, JPanel,
         JPasswordField, JLabel, JTextArea, JTextField, JScrollPane,
         SwingConstants, WindowConstants, JFileChooser, JOptionPane,
-        JProgressBar, JDialog, BorderLayout)
+        JProgressBar, JDialog)
 
 import shapefile
 from rdflib.graph import Graph, ConjunctiveGraph
@@ -577,78 +578,15 @@ def nm_mdb_to_n3(inputFile, outputFile):
     return True
 
 class ConversionGUI(object):
-    def __init__(self):
-	
-	    #Splash Screen Creation
-        self.splash = JFrame("National Map 2 RDF", 
-	                        defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE)
-        self.splash.setPreferredSize(Dimension(300, 300))
-        self.splash.setMaximumSize(Dimension(800, 600))
-		
-        self.background = JPanel(BorderLayout())
-        self.splash.add(self.background)
-  
-        self.greeting = JLabel("Welcome to the National Map RDF Converter")
-        self.background.add(self.greeting, )
-        self.background.add(Box.createRigidArea(Dimension(0, 100)))
-		
-        self.next = JButton('Continue', actionPerformed=self.changeVisibility)
-        self.background.add(self.next)
-		
-
-		
-	    #Main screen with file chooser
-        self.frame = JFrame("National Map 2 RDF",
+    chooser = JFileChooser()
+    inputFile = None
+    outputFile = None
+    outputField = JLabel('')
+    frame = JFrame("National Map 2 RDF",
                             defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE)
-        self.frame.setPreferredSize(Dimension(500, 200))
-        self.frame.setMaximumSize(Dimension(800, 600))
-        
-        self.convertPanel = JPanel()
-        self.convertPanel.setLayout(BoxLayout(self.convertPanel, BoxLayout.Y_AXIS))
-        self.frame.add(self.convertPanel)
-		
-        self.convertPanel.add(JFileChooser())
-		
-        self.inputField = JLabel('')
-        self.convertPanel.add(JLabel('Input MDB filename:  ', SwingConstants.RIGHT))
-        self.convertPanel.add(self.inputField)
-                              
-        self.fileButton = JButton('Select Input File', actionPerformed=self.selectFile)
-        self.convertPanel.add(self.fileButton)
-        self.convertPanel.add(Box.createRigidArea(Dimension(0, 15)))
-		
-        self.outputField = JLabel('')
-        self.convertPanel.add(JLabel('Output N3 filename:  ', SwingConstants.RIGHT))
-        self.convertPanel.add(self.outputField)
-        self.convertButton = JButton('Convert!', actionPerformed = self.convert)
-        self.convertPanel.add(self.convertButton)
-        
-        self.frame.setVisible(False)
-        self.splash.setVisible(True)
-		
-        self.inputFile = None
-        self.outputFile = None
-        self.frame.pack()
-        self.splash.pack()
-	
-	
-    def changeVisibility(self, event):
-        self.frame.setVisible(True)
-        self.splash.setVisible(False)	
-	
-        
-    def selectFile(self, event):
-        fc = JFileChooser()
-        fc.showOpenDialog(self.frame)
-        self.inputFile = fc.getSelectedFile().getCanonicalPath()
-        self.inputField.setText(self.inputFile)
-        suggestedOutputFile = self.inputFile
-        suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
-        
-        self.outputField.setText(suggestedOutputFile + '.n3')
-        self.outputFile = self.outputField.getText()
+     
 
-    def convert(self, event):
+    def convert(self):
         ret_val = False
         progressBar = JProgressBar()
         progressBar.setIndeterminate(True)
@@ -671,8 +609,81 @@ class ConversionGUI(object):
             JOptionPane.showMessageDialog(self.convertPanel, "Conversion Successful!.");
         else:
             JOptionPane.showMessageDialog(self.convertPanel, "Conversion Failed!.");
-                
+    
+     
+    class Selected(ActionListener):		
+        def __init__(self, conversion_gui):
+            self.gui = conversion_gui
+            
+        def actionPerformed(self, event):
+            if event.getActionCommand() == "ApproveSelection":
+                self.gui.inputFile = self.gui.chooser.getSelectedFile().getCanonicalPath()
+                suggestedOutputFile = self.gui.inputFile
+                suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
         
+                self.gui.outputField.setText(suggestedOutputFile + '.n3')
+                self.gui.outputFile = self.gui.outputField.getText()
+                
+                self.gui.convert()
+                    
+            elif event.getActionCommand() == "CancelSelection":
+                sys.exit()
+    
+    def __init__(self):	
+	    #Splash Screen Creation
+        self.splash = JFrame("National Map 2 RDF", 
+	                        defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE)
+        self.splash.setSize(Dimension(300, 300))
+        self.splash.setMinimumSize(Dimension(300, 300))
+        self.splash.setMaximumSize(Dimension(300, 300))
+
+        self.background = JPanel()
+        self.background.setLayout(BorderLayout())
+        self.splash.add(self.background)
+        
+  
+        self.greeting = JLabel("Welcome to the National Map RDF Converter")
+        self.background.add(self.greeting, BorderLayout.CENTER)
+		
+        self.next = JButton('Continue', actionPerformed=self.changeVisibility)
+        self.next.preferredSize = (50, 20)
+        self.background.add(self.next, BorderLayout.SOUTH)
+		
+		
+	    #Main screen with file chooser
+        
+        self.frame.setPreferredSize(Dimension(500, 500))
+        self.frame.setMinimumSize(Dimension(500, 500))
+				
+        
+        self.convertPanel = JPanel()
+        self.convertPanel.setLayout(BoxLayout(self.convertPanel, BoxLayout.Y_AXIS))
+        self.frame.add(self.convertPanel)
+		
+		
+		#File chooser
+        self.chooser.setApproveButtonText("Convert File")
+        self.chooser.addActionListener(self.Selected(self))
+        self.convertPanel.add(self.chooser)
+        
+        self.labelPanel = JPanel()
+        self.labelPanel.setLayout(BoxLayout(self.labelPanel, BoxLayout.X_AXIS))
+        self.convertPanel.add(self.labelPanel)
+        self.labelPanel.add(JLabel('Output N3 filename:  '))
+        self.labelPanel.add(self.outputField)
+
+        self.frame.setVisible(False)
+        self.splash.setVisible(True)
+		
+        self.frame.pack()
+        self.splash.pack()
+
+
+    def changeVisibility(self, event):
+        self.frame.setVisible(True)
+        self.splash.setVisible(False)	
+
+
         
 if __name__ == '__main__':
     ConversionGUI()
