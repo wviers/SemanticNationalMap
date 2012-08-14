@@ -1,0 +1,51 @@
+National Map N3 Conversion Program - This software converts data downloaded from the 
+                                     National Map into RDF in the N3 format.
+Wayne Viers, USGS
+wviers@usgs.gov
+8-13-2012
+
+
+***Getting data from the National Map***
+The file format the conversion program accepts as input is a Personal GDB .mdb file.
+
+These files can be downloaded from the National Map via the National Map Viewer
+interface (http://viewer.nationalmap.gov/viewer/).
+    
+    -Once in the Viewer, you can zoom the map to an extent you would like to download.
+    
+    
+    -From here you can either click Download Data in the top right of the viewer and 
+    download the current map extent or you can select a reference area in the download 
+    options and then click one of the reference areas on the map.  This will display the 
+    reference area in the panel on the left for you to click download.
+    
+    
+    -After selecting your area to download, you can click any number of checkboxes to 
+    determine which data you will receive and you will select the format 
+    "Personal GDB 9.2" (If the Personal GDB 9.2 is not available you may need to zoom
+    in and/or select a different reference area).
+
+    
+    -Finally, checkout the items you have selected and an email address you would like
+    the data to be sent to.
+    
+    
+***Using the Conversion Program***
+The conversion program comes in the form of an executable jar file.  This means a 
+Java Runtime Environment is required to run the program.
+    
+    -When the jar file is executed (in Windows this can be done by double clicking
+    the nm2rdf.jar file)  a title screen will appear and after continue is clicked a 
+    screen with a file selector will appear.  
+   
+   
+    -Browse to the .mdb file you would like to convert and click Convert File.
+   
+   
+    -A new window will appear displaying that the program is converting the data.
+    When it is finished another window will appear saying whether or not the conversion
+    was successful (This could take several minutes depending on the size of the input).
+   
+   
+    -The output N3 files will be created in the directory the input file was retrieved 
+    from.

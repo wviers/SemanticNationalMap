@@ -570,7 +570,7 @@ def nm_mdb_to_n3(inputFile, outputFile):
         print('Processing table: ' + table.getName())
         InsertLayer(table, store)
         if len(store) > 0:
-            store.serialize(destination=outputFile+table.getName(), format='n3')
+            store.serialize(destination=outputFile+table.getName() + ".n3", format='n3')
         store = None
     print('All tables processed')
     
@@ -621,7 +621,7 @@ class ConversionGUI(object):
                 suggestedOutputFile = self.gui.inputFile
                 suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
         
-                self.gui.outputField.setText(suggestedOutputFile + '.n3')
+                self.gui.outputField.setText(suggestedOutputFile)
                 self.gui.outputFile = self.gui.outputField.getText()
                 
                 self.gui.convert()
@@ -669,7 +669,7 @@ class ConversionGUI(object):
         self.labelPanel = JPanel()
         self.labelPanel.setLayout(BoxLayout(self.labelPanel, BoxLayout.X_AXIS))
         self.convertPanel.add(self.labelPanel)
-        self.labelPanel.add(JLabel('Output N3 filename:  '))
+        self.labelPanel.add(JLabel('Output N3 file Location:  '))
         self.labelPanel.add(self.outputField)
 
         self.frame.setVisible(False)
