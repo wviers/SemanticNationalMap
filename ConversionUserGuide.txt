@@ -35,8 +35,8 @@ The conversion program comes in the form of an executable jar file.  This means 
 Java Runtime Environment is required to run the program.
     
     -When the jar file is executed (in Windows this can be done by double clicking
-    the nm2rdf.jar file)  a title screen will appear and after continue is clicked a 
-    screen with a file selector will appear.  
+    the nm2rdf.jar file, or in Linux by running java -jar nm2rdf.jar)  a title screen
+    will appear and after continue is clicked a screen with a file selector will appear.  
    
    
     -Browse to the .mdb file you would like to convert and click Convert File.
@@ -49,3 +49,13 @@ Java Runtime Environment is required to run the program.
    
     -The output N3 files will be created in the directory the input file was retrieved 
     from.
+
+
+
+***Known Issues***
+If the conversion process is taking longer then 10 minutes or failing with an 
+OutOfMemoryError exception, then you will need to run the program from command prompt
+with the command java -jar -Xms1024m -Mxm1024m nm2rdf.jar to increase the heap size 
+to 1G.
+(1024m is an arbitraty increase and can be more or less depending on the size of the 
+input).

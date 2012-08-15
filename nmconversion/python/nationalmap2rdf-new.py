@@ -563,7 +563,6 @@ def nm_mdb_to_n3(inputFile, outputFile):
         print("Error opening database.")
         return False
 
-
     for table in d:
         store = ConjunctiveGraph(identifier='temp')
         load_namespaces(store)
@@ -571,6 +570,7 @@ def nm_mdb_to_n3(inputFile, outputFile):
         InsertLayer(table, store)
         if len(store) > 0:
             store.serialize(destination=outputFile+table.getName() + ".n3", format='n3')
+        
         store = None
     print('All tables processed')
     
