@@ -57,5 +57,5 @@ If the conversion process is taking longer then 10 minutes or failing with an
 OutOfMemoryError exception, then you will need to run the program from command prompt
 with the command java -jar -Xms1024m -Mxm1024m nm2rdf.jar to increase the heap size 
 to 1G.
-(1024m is an arbitraty increase and can be more or less depending on the size of the 
+(1024m is an arbitrary increase and can be more or less depending on the size of the 
 input).
