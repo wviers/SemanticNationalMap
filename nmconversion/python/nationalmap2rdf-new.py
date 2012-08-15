@@ -497,7 +497,18 @@ layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
 
-def InsertFeature(feature, model, store):
+def triple_to_nt(sub, pred, obj):
+    nt = StringBuilder()
+    nt.append(sub.n3())
+    nt.append(' ')
+    nt.append(pred.n3())
+    nt.append(' ')
+    nt.append(obj.n3())
+    nt.append(' . \n')
+
+    return nt.toString()
+
+def InsertFeature(feature, model, output_file):
     feature_uri = model['ID_URI_TEMPLATE'][0]
     subject_field = model['ID_URI_TEMPLATE'][1]
     feature_uri = feature_uri + unicode(feature[subject_field])
@@ -514,44 +525,29 @@ def InsertFeature(feature, model, store):
         else:
             obj = URIRef(v[1].format(str(int(f_val))))
 
-        store.add((URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
+        output_file.write(triple_to_nt(URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
             
     wkt = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type)
-    store.add((URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
-    store.add((URIRef(feature_uri), rdf['type'], model['TYPE']))
+    output_file.write(triple_to_nt(URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
+    output_file.write(triple_to_nt(URIRef(feature_uri), rdf['type'], model['TYPE']))
+
     # Create Geometry 
-    store.add((URIRef(geometry_uri), geo['asWKT'], wkt))
-    store.add((URIRef(geometry_uri), rdf['type'], geo['Geometry']))
+    output_file.write(triple_to_nt(URIRef(geometry_uri), geo['asWKT'], wkt))
+    output_file.write(triple_to_nt(URIRef(geometry_uri), rdf['type'], geo['Geometry']))
 
     return True
 
-def InsertLayer(layer, store):
+def InsertLayer(layer, output_file):
     if layer.getName() in layer_models:
         print('  Model found')
         model = layer_models[layer.getName()]
         for feature in layer:
-            InsertFeature(feature, model, store)
+            InsertFeature(feature, model, output_file)
 
 
-def load_namespaces(store):
-    # bind namespaces
-    store.bind('nhd', nhd)
-    store.bind('nhdf', nhdf)
-    store.bind('nhdg', nhdg)
-    store.bind('gnis', gnis)
-    store.bind('geo', geo)
-    store.bind('trans', trans)
-    store.bind('transf', transf)
-    store.bind('transg', transg)
-    store.bind('rdfs', rdfs)
-    store.bind('gu', gu)
-    store.bind('struct', struct)
-    store.bind('hu', hu)
-    
 def nm_mdb_to_n3(inputFile, outputFile):
     f = File(inputFile)
-    #    o = open(outputFile, 'w')
-    store = ConjunctiveGraph(identifier='temp')
+    o = open(outputFile, 'w')
     
     if f.exists() == False:
         print("Error opening file.")
@@ -564,14 +560,9 @@ def nm_mdb_to_n3(inputFile, outputFile):
 
 
     for table in d:
-        store = ConjunctiveGraph(identifier='temp')
-        load_namespaces(store)
         print('Processing table: ' + table.getName())
-        InsertLayer(table, store)
-        if len(store) > 0:
-            print('   serializing...')
-            store.serialize(destination=outputFile+table.getName(), format='n3')
-        store = None
+        InsertLayer(table, o)
+
     print('All tables processed')
     
 
