@@ -123,18 +123,18 @@ struct = Namespace('http://cegis.usgs.gov/rdf/struct/')
 gu = Namespace('http://cegis.usgs.gov/rdf/gu/')
 guf = Namespace('http://cegis.usgs.gov/rdf/gu/Features/')
 gug = Namespace('http://cegis.usgs.gov/rdf/gu/Geometries/')
-hu = Namespace('http://cegis.usgs.gov/rdf/huc/')
-huf = Namespace('http://cegis.usgs.gov/rdf/hucf/')
-hug = Namespace('http://cegis.usgs.gov/rdf/hucg/')
+hu = Namespace('http://cegis.usgs.gov/rdf/nhd/huc/')
+huf = Namespace('http://cegis.usgs.gov/rdf/nhd/hucf/')
+hug = Namespace('http://cegis.usgs.gov/rdf/nhd/hucg/')
 
 int_type =  '^^<http://www.w3.org/2001/XMLSchema#int>'
 string_type = '^^<http://www.w3.org/2001/XMLSchema#string>'
-wkt_type = 'http://www.opengis.net/geosparql#wktLiteral'
+wkt_type = URIRef('http://www.opengis.net/sf#wktLiteral')
 
 layer_models = {}
 
 layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'), 
-                            'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
+                            'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                              'TYPE': nhd['point'],
                              'FCode': (nhd['fCode'], nhd['fCode/{0}']),
                              'FDate': (nhd['fDate'], '{0}', str),
@@ -144,7 +144,7 @@ layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'
                              }
 
 layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
-                                'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
+                                'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                                 'TYPE': nhd['flowline'],
                                 'FCode': (nhd['fCode'], nhd['fCode/{0}']),
                                 'FDate': (nhd['fDate'], '{0}', unicode),
@@ -156,7 +156,7 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
                                 'FlowDir': (nhd['flowDir'], nhd['flowDir/{0}']),
                                 'WBAreaComID': (nhd['wbAreaComID'], nhdf['{0}']),
                                 'FType': (nhd['fType'], nhd['fType/{0}']),
-                                'Shape_Length': (nhd['shapeLength'], '{0}'),
+                                'Shape_Length': (nhd['shapeLength'], '{0}', float),
                                 'Enabled': (nhd['enabled'], '{0}', unicode)
                                 }
 
@@ -410,7 +410,7 @@ layer_models['WBD_HU14'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_14'),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
                             'LoadDate':  (hu['loadDate'], '{0}', unicode),
-                            'HU_12_Name': (hu['hu14Name'], '{0}', unicode),
+                            'HU_12_Name': (rdf['label'], '{0}', unicode),
                             'HU_12_Type': (hu['hu14Type'], '{0}', unicode),
                             'HU_12_Mode': (hu['hu14Mod'],  '{0}', unicode),
                             'NContrb_Acres': (hu['nContrbAcres'], '{0}', float),
@@ -427,7 +427,7 @@ layer_models['WBD_HU12'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_12'),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
                             'LoadDate':  (hu['loadDate'], '{0}', unicode),
-                            'HU_12_Name': (hu['hu12Name'], '{0}', unicode),
+                            'HU_12_Name': (rdfs['label'], '{0}', unicode),
                             'HU_12_Type': (hu['hu12Type'], '{0}', unicode),
                             'HU_12_Mode': (hu['hu12Mod'],  '{0}', unicode),
                             'NContrb_Acres': (hu['nContrbAcres'], '{0}', float),
@@ -444,7 +444,7 @@ layer_models['WBD_HU8'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_8'),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
                             'LoadDate':  (hu['loadDate'], '{0}', unicode),
-                            'HU_8_Name': (hu['hu8Name'], '{0}', unicode),
+                            'HU_8_Name': (rdfs['label'], '{0}', unicode),
                             'HU_8_Type': (hu['hu8Type'], '{0}', unicode),
                             'HU_8_Mode': (hu['hu8Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
@@ -459,7 +459,7 @@ layer_models['WBD_HU10'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_10'),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
                             'LoadDate':  (hu['loadDate'], '{0}', unicode),
-                            'HU_10_Name': (hu['hu10Name'], '{0}', unicode),
+                            'HU_10_Name': (rdfs['label'], '{0}', unicode),
                             'HU_10_Type': (hu['hu10Type'], '{0}', unicode),
                             'HU_10_Mode': (hu['hu10Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
@@ -475,7 +475,7 @@ layer_models['WBD_HU6'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_6'),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
                             'LoadDate':  (hu['loadDate'], '{0}', unicode),
-                            'HU_6_Name': (hu['hu6Name'], '{0}', unicode),
+                            'HU_6_Name': (rdfs['label'], '{0}', unicode),
                             'HU_6_Type': (hu['hu6Type'], '{0}', unicode),
                             'HU_6_Mode': (hu['hu6Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
@@ -490,7 +490,7 @@ layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
                             'LoadDate':  (hu['loadDate'], '{0}', unicode),
-                            'HU_4_Name': (hu['hu4Name'], '{0}', unicode),
+                            'HU_4_Name': (rdfs['label'], '{0}', unicode),
                             'HU_4_Type': (hu['hu4Type'], '{0}', unicode),
                             'HU_4_Mode': (hu['hu4Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
@@ -516,7 +516,7 @@ def InsertFeature(feature, model, store):
 
         store.add((URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
             
-    wkt = Literal(binary_shape_to_wkt(feature['Shape']))
+    wkt = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type)
     store.add((URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
     store.add((URIRef(feature_uri), rdf['type'], model['TYPE']))
     # Create Geometry 
@@ -569,6 +569,7 @@ def nm_mdb_to_n3(inputFile, outputFile):
         print('Processing table: ' + table.getName())
         InsertLayer(table, store)
         if len(store) > 0:
+            print('   serializing...')
             store.serialize(destination=outputFile+table.getName(), format='n3')
         store = None
     print('All tables processed')
