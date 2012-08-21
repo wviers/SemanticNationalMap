@@ -6,6 +6,7 @@ import sys, os
 from struct import unpack, unpack_from, pack_into, pack
 import StringIO
 import array
+from datetime import datetime
 from   java.awt.event import ActionListener;
 from java.awt import Component, GridLayout, Dimension, BorderLayout
 from javax.swing import (BoxLayout, Box, ImageIcon, JButton, JFrame, JPanel,
@@ -18,6 +19,7 @@ from rdflib.graph import Graph, ConjunctiveGraph
 from rdflib import URIRef, Namespace
 from rdflib.term import Literal
 from rdflib.term import URIRef
+from rdflib.namespace import XSD
 
 
 # Constants for shape types
@@ -37,12 +39,13 @@ MULTIPOINTM = 28
 MULTIPATCH = 31
 
 def create_point(point_list):
-    wkt = 'POINT ( '
+    wkt = 'POINT ('
     
     for c in point_list:
-        wkt += ' {0}'.format(c)
+        wkt += '{0} '.format(c)
 
-    wkt += ' )'
+    wkt = wkt[:-1] # Remove last space from string
+    wkt += ')'
 
     return wkt
 
@@ -127,19 +130,34 @@ gug = Namespace('http://cegis.usgs.gov/rdf/gu/Geometries/')
 hu = Namespace('http://cegis.usgs.gov/rdf/nhd/huc/')
 huf = Namespace('http://cegis.usgs.gov/rdf/nhd/hucf/')
 hug = Namespace('http://cegis.usgs.gov/rdf/nhd/hucg/')
+nhd_ontology = Namespace('http://cegis.usgs.gov/NHDOntology/')
 
 int_type =  '^^<http://www.w3.org/2001/XMLSchema#int>'
 string_type = '^^<http://www.w3.org/2001/XMLSchema#string>'
 wkt_type = URIRef('http://www.opengis.net/sf#wktLiteral')
-
+wkt_type2 = URIRef('http://rdf.opensahara.com/type/geo/wkt')
+def parse_date_to_iso(date_string):
+    new_date = datetime.strptime(date_string, "%a %b %d %H:%M:%S %Z %Y")
+    return new_date.isoformat()
+    
+def parse_resolution(resolution):
+    if int(resolution) == 0:
+        return "local"
+    elif int(resolution) == 1:
+        return "high"
+    elif int(resolution) == 2:
+        return "medium"
+    else:
+        return ""
+    
 layer_models = {}
 
 layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'), 
                             'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                              'TYPE': nhd['point'],
                              'FCode': (nhd['fCode'], nhd['fCode/{0}']),
-                             'FDate': (nhd['fDate'], '{0}', str),
-                             'Resolution': (nhd['resolution'], '{0}', int),
+                             'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
+                             'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
 							 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                              'GNIS_Name': (rdfs['label'], '{0}', unicode),
                              }
@@ -148,8 +166,8 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
                                 'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                                 'TYPE': nhd['flowline'],
                                 'FCode': (nhd['fCode'], nhd['fCode/{0}']),
-                                'FDate': (nhd['fDate'], '{0}', unicode),
-                                'Resolution': (nhd['resolution'], '{0}', int),
+                                'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
+                                'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                                 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                                 'GNIS_Name': (rdfs['label'], '{0}', unicode),
                                 'LengthKM': (nhd['lengthKM'], '{0}', float),
@@ -158,15 +176,15 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
                                 'WBAreaComID': (nhd['wbAreaComID'], nhdf['{0}']),
                                 'FType': (nhd['fType'], nhd['fType/{0}']),
                                 'Shape_Length': (nhd['shapeLength'], '{0}', float),
-                                'Enabled': (nhd['enabled'], '{0}', unicode)
+                                'Enabled': (nhd['enabled'], '{0}', lambda x: bool(int(x)))
                                 }
 
 layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                            'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                            'TYPE': nhd['area'],
-                           'FDate': (nhd['fDate'], '{0}', unicode),
+                           'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
                            'FCode': (nhd['fCode'], nhd['fCode/{0}']),
-                           'Resolution': (nhd['resolution'], '{0}', int),
+                           'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                            'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                            'GNIS_Name': (rdfs['label'], '{0}', unicode),
                            'AreaSqKm': (nhd['areaSqKM'], '{0}', float),
@@ -179,8 +197,8 @@ layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier')
 layer_models['NHDWaterBody'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                                 'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
                                 'TYPE': nhd['waterbody'],
-                                'FDate': (nhd['fDate'], '{0}', unicode),
-                                'Resolution': (nhd['resolution'], '{0}', int),
+                                'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
+                                'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                                 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                                 'GNIS_Name': (rdfs['label'], '{0}', unicode),
                                 'FCode': (nhd['fCode'], nhd['fCode/{0}']),
@@ -201,7 +219,7 @@ layer_models['Trans_RoadSegment'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_Fea
                                      'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                     'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'Interstate': (trans['interstate'], '{0}', unicode),
                                      'US_Route': (trans['usRoute'], '{0}', unicode),
                                      'State_Route': (trans['stateRoute'], '{0}', unicode),
@@ -229,7 +247,7 @@ layer_models['Trans_AirportPoint'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_Fe
                                      'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                     'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'FType': (trans['fType'], trans['fType/{0}']),
                                      'FCode': (trans['fCode'], trans['fCode/{0}']),
                                      'Airport_Class': (trans['airportClass'], '{0}', unicode),
@@ -246,7 +264,7 @@ layer_models['Trans_RailFeature'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_Fea
                                      'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                     'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'FCode': (trans['fCode'], trans['fCode/{0}']),
                                      'Name': (rdfs['label'], '{0}', unicode),
                                      'Rail_Usage': (trans['railUsage'], '{0}', unicode),
@@ -265,7 +283,7 @@ layer_models['Trans_AirportRunway'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_F
                                        'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                        'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                        'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                       'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                       'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                        'FCode': (trans['fCode'], trans['fCode/{0}']),
                                        'Name': (rdfs['label'], '{0}', unicode),
                                        'FAA_Airport_Code': (trans['faaAirportCode'], '{0}', unicode),
@@ -286,7 +304,7 @@ layer_models['Struct_Point'] = {'ID_URI_TEMPLATE': (struct['Features/'], 'Source
                                 'Source_Originator': (struct['sourceOriginator'], '{0}', unicode),
                                 'Data_Security': (struct['dataSecurity'], '{0}', unicode),
                                 'Distribution_Policy': (struct['distributionPolicy'], '{0}', unicode),
-                                'LoadDate': (struct['loadDate'], '{0}', unicode),
+                                'LoadDate': (struct['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                 'FCode': (struct['fCode'], struct['fCode/{0}']),
                                 'FType': (struct['fType'], struct['fType/{0}']),
                                 'Name': (rdfs['label'], '{0}', unicode),
@@ -311,7 +329,7 @@ layer_models['GU_CountyOrEquivalent'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Fe
                                          'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                          'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                          'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                         'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                         'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                          'FCode': (gu['fCode'], gu['fCode/{0}']),
                                          'State_FIPSCode': (gu['stateFIPSCode'], '{0}', unicode),
                                          'State_Name': (gu['stateName'], '{0}', unicode),
@@ -333,7 +351,7 @@ layer_models['GU_IncorporatedPlace'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Fea
                                          'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                          'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                          'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                         'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                         'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                          'FCode': (gu['fCode'], gu['fCode/{0}']),
                                          'State_Name': (gu['stateName'], '{0}', unicode),
                                          'Place_FIPSCode': (gu['placeFIPSCode'], '{0}', unicode),
@@ -352,7 +370,7 @@ layer_models['GU_StateOrTerritory'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Feat
                                        'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                        'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                        'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                       'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                       'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                        'FCode': (gu['fCode'], gu['fCode/{0}']),
                                        'State_FIPSCode': (gu['stateFIPSCode'], '{0}', unicode),
                                        'State_Name': (rdfs['label'], '{0}', unicode),
@@ -371,7 +389,7 @@ layer_models['GU_MinorCivilDivision'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Fe
                                          'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                          'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                          'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                         'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                         'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                          'FCode': (gu['fCode'], gu['fCode/{0}']),
                                          'State_Name': (gu['stateName'], '{0}', unicode),
                                          'MinorCivilDivision_FIPSCode': (gu['minorCivilDivisonFIPSCode'], '{0}', unicode),
@@ -389,7 +407,7 @@ layer_models['GU_Jurisdictional'] = {'ID_URI_TEMPLATE': (guf[''], 'Permanent_Ide
                                      'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                     'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                                      'Name': (rdfs['label'], '{0}', unicode),
                                      'AreaSqKM': (gu['areaSqKM'], '{0}', float),
@@ -410,7 +428,7 @@ layer_models['WBD_HU14'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_14'),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_12_Name': (rdf['label'], '{0}', unicode),
                             'HU_12_Type': (hu['hu14Type'], '{0}', unicode),
                             'HU_12_Mode': (hu['hu14Mod'],  '{0}', unicode),
@@ -423,11 +441,12 @@ layer_models['WBD_HU14'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_14'),
 layer_models['WBD_HU12'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_12'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_12'),
                             'TYPE': hu['WBD_HU12'],
+                            'HUC_12': (hu['HUC_12'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_12_Name': (rdfs['label'], '{0}', unicode),
                             'HU_12_Type': (hu['hu12Type'], '{0}', unicode),
                             'HU_12_Mode': (hu['hu12Mod'],  '{0}', unicode),
@@ -440,14 +459,15 @@ layer_models['WBD_HU12'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_12'),
 layer_models['WBD_HU8'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_8'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_8'),
                             'TYPE': hu['WBD_HU8'],
+                            'HUC_8': (hu['HUC_8'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_8_Name': (rdfs['label'], '{0}', unicode),
                             'HU_8_Type': (hu['hu8Type'], '{0}', unicode),
-                            'HU_8_Mode': (hu['hu8Mod'],  '{0}', unicode),
+                            'HU_8_Mod': (hu['hu8Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
@@ -455,14 +475,15 @@ layer_models['WBD_HU8'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_8'),
 layer_models['WBD_HU10'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_10'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_10'),
                             'TYPE': hu['WBD_HU10'],
+                            'HUC_10': (hu['HUC_10'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_10_Name': (rdfs['label'], '{0}', unicode),
                             'HU_10_Type': (hu['hu10Type'], '{0}', unicode),
-                            'HU_10_Mode': (hu['hu10Mod'],  '{0}', unicode),
+                            'HU_10_Mod': (hu['hu10Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
@@ -471,11 +492,12 @@ layer_models['WBD_HU10'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_10'),
 layer_models['WBD_HU6'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_6'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_6'),
                             'TYPE': hu['WBD_HU6'],
+                            'HUC_6': (hu['HUC_6'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_6_Name': (rdfs['label'], '{0}', unicode),
                             'HU_6_Type': (hu['hu6Type'], '{0}', unicode),
                             'HU_6_Mode': (hu['hu6Mod'],  '{0}', unicode),
@@ -486,11 +508,12 @@ layer_models['WBD_HU6'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_6'),
 layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_4'),
                             'TYPE': hu['WBD_HU4'],
+                            'HUC_4': (hu['HUC_4'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode), 
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_4_Name': (rdfs['label'], '{0}', unicode),
                             'HU_4_Type': (hu['hu4Type'], '{0}', unicode),
                             'HU_4_Mode': (hu['hu4Mod'],  '{0}', unicode),
@@ -498,6 +521,320 @@ layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
 
+ftypes = {'558': nhd_ontology['ArtificialPath'],
+          '336': nhd_ontology['CanalOrDitch'],
+          '566': nhd_ontology['Coastline'],
+          '334': nhd_ontology['Connector'],
+          '428': nhd_ontology['Pipeline'],
+          '460': nhd_ontology['StreamOrRiver'],
+          '420': nhd_ontology['UndergroundConduit'],
+          '493': nhd_ontology['Estuary'],
+          '378': nhd_ontology['IceMass'],
+          '390': nhd_ontology['LakeOrPond'],
+          '361': nhd_ontology['Playa'],
+          '436': nhd_ontology['Reservoir'],
+          '466': nhd_ontology['SwampOrMarsh'],
+          '318': nhd_ontology['Bridge'],
+          '343': nhd_ontology['DamOrWier'],
+          '362': nhd_ontology['Flume'],
+          '369': nhd_ontology['Gate'],
+          '568': nhd_ontology['Levee'],
+          '398': nhd_ontology['LockChamber'],
+          '411': nhd_ontology['NonearthenShore'],
+          '431': nhd_ontology['Rapids'],
+          '434': nhd_ontology['Reef'],
+          '450': nhd_ontology['SinkOrRise'],
+          '503': nhd_ontology['SoundingDatumLine'],
+          '533': nhd_ontology['SpecialUseZoneLimit'],
+          '478': nhd_ontology['Tunnel'],
+          '483': nhd_ontology['Wall'],
+          '487': nhd_ontology['Waterfall'],
+          '343': nhd_ontology['DamOrWier'],
+          '367': nhd_ontology['GagingStation'],
+          '441': nhd_ontology['Rock'],
+          '458': nhd_ontology['SpringOrSeep'],
+          '485': nhd_ontology['WaterIntakeOrOutflow'],
+          '487': nhd_ontology['Waterfall'],
+          '488': nhd_ontology['Well'],
+          '537': nhd_ontology['AreaOfComplexChannels'],
+          '307': nhd_ontology['AreaToBeSubmerged'],
+          '312': nhd_ontology['BayOrInlet'],
+          '364': nhd_ontology['Foreshore'],
+          '373': nhd_ontology['HazardZone'],
+          '403': nhd_ontology['InundationArea'],
+          '445': nhd_ontology['SeaOrOcean'],
+          '454': nhd_ontology['SpecialUseZone'],
+          '455': nhd_ontology['Spillway'],
+          '461': nhd_ontology['SubmergedStream'],
+          '484': nhd_ontology['Wash']}
+
+fcodes = {'33601': ((nhd_ontology['CanalOrDitchType'],
+                     nhd_ontology['Aqueduct']),),
+          '33603': ((nhd_ontology['CanalOrDitchType'],
+                     nhd_ontology['Stormwater']),),
+          '42801': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Aqueduct']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['AtOrNear'])),
+          '42802': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Aqueduct']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Elevated'])),
+          '42803': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Aqueduct']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underground'])),
+          '42804': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Aqueduct']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underwater'])),
+          '42805': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['GeneralCase']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['AtOrNearSurface'])),
+          '42806': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['GeneralCase']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Elevated'])),
+          '42807': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['GeneralCase']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underground'])), 
+          '42808': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['GeneralCase']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underwater'])), 
+          '42809': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Penstock']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['AtOrNear'])), 
+          '42810': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Penstock']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Elevated'])), 
+          '42811': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Penstock']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underground'])), 
+          '42812': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Penstock']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underwater'])), 
+          '42813': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Siphon']),
+                    (nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Unspecified'])), 
+          '42814': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['GeneralCase'])),
+          '42815': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Penstock'])),
+          '42816': ((nhd_ontology['Product'],
+                     nhd_ontology['Water']),
+                    (nhd_ontology['PipelineType'],
+                     nhd_ontology['Aqueduct'])),
+          '46003': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Intermittent']),),
+          '46006': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),),
+          '46007': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Ephemeral']),),
+          '42001': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Definite']),),
+          '42002': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Indefinite']),),
+          '42003': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Approximate']),),
+          '39001': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Intermittent']),),
+          '39004': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),),
+          '39005': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Intermittent']),
+                     (nhd_ontology['Stage'],
+                      nhd_ontology['HighWaterElevation'])),
+          '39006': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Intermittent']),
+                     (nhd_ontology['Stage'],
+                      nhd_ontology['DateOfPhotography'])),
+          '39009': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),
+                     (nhd_ontology['Stage'],
+                      nhd_ontology['AverageWaterElevation'])),
+          '39010': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),
+                     (nhd_ontology['Stage'],
+                      nhd_ontology['HighWaterElevation'])),
+          '39011': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),
+                     (nhd_ontology['Stage'],
+                      nhd_ontology['DateOfPhotography'])),
+          '39012': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),
+                     (nhd_ontology['Stage'],
+                      nhd_ontology['AverageWaterElevation'])),
+          '43601': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Aquaculture']),),
+          '43603': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['DecorativePool']),),
+          '43604': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['DisposalTailingsPond']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Earthen'])),
+          '43605': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['DisposalTailingsPond']),),
+          '43606': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['DisposalUnspecified']),),
+          '43607': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Evaporator']),),
+          '43608': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['SwimmingPool']),),
+          '43609': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['TreatmentCoolingPond']),),
+          '43610': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['TreatmentFiltrationPond']),),
+          '43611': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['TreatmentSettlingPond']),),
+          '43612': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['TreatmentSewageTreatmentPond']),),
+          '43613': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['WaterStorage']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Nonearthen'])),
+          '43614': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['WaterStorage']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Nonearthen']),
+                    (nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Intermittent'])),
+          '43615': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['WaterStorage']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Nonearthen']),
+                    (nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial'])),
+          '43617': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['WaterStorage']),),
+          '43618': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Unspecified']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Earthen'])),
+          '43619': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Unspecified']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Nonearthen'])),
+          '43621': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['WaterStorage']),
+                    (nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial'])),
+          '43623': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Evaporator']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Earthen'])),
+          '43624': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Treatment']),),
+          '43625': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Disposal']),),
+          '43625': ((nhd_ontology['ReservoirType'],
+                     nhd_ontology['Disposal']),
+                    (nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['nonearthen'])),
+          '46601': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Intermittant']),),
+          '46602': ((nhd_ontology['HydrographicCategory'],
+                     nhd_ontology['Perennial']),),
+          '34305': ((nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Earthen']),),
+          '34306': ((nhd_ontology['ConstructionMaterial'],
+                     nhd_ontology['Nonearthen']),),
+          '50301': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Approximate']),),
+          '50302': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Definite']),),
+          '53301': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Definite']),),
+          '53302': ((nhd_ontology['PositionalAccuracy'],
+                     nhd_ontology['Indefinite']),),
+          '44101': ((nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Abovewater']),),
+          '44102': ((nhd_ontology['RelationshipToSurface'],
+                     nhd_ontology['Underwater']),),
+          '40307': ((nhd_ontology['InundationControlStatus'],
+                     nhd_ontology['NotControlled']),),
+          '40308': ((nhd_ontology['InundationControlStatus'],
+                     nhd_ontology['Controlled']),),
+          '40307': ((nhd_ontology['InundationControlStatus'],
+                     nhd_ontology['NotControlled']),
+                    (nhd_ontology['Stage'],
+                     nhd_ontology['FloodElevation'])),
+          '45401': ((nhd_ontology['SpecialUseZoneType'],
+                     nhd_ontology['DumpSite']),
+                    (nhd_ontology['OperationalStatus'],
+                     nhd_ontology['Operational'])),
+          '45402': ((nhd_ontology['SpecialUseZoneType'],
+                     nhd_ontology['DumpSite']),
+                    (nhd_ontology['OperationalStatus'],
+                     nhd_ontology['Abandoned'])),
+          '45403': ((nhd_ontology['SpecialUseZoneType'],
+                     nhd_ontology['SpoilArea']),
+                    (nhd_ontology['OperationalStatus'],
+                     nhd_ontology['Operational'])),
+          '45402': ((nhd_ontology['SpecialUseZoneType'],
+                     nhd_ontology['SpoilArea']),
+                    (nhd_ontology['OperationalStatus'],
+                     nhd_ontology['Abandoned'])),
+}
+
+          
+def ftype_to_rdftype(ftype):
+    """ ftype is a string """
+    rdftype = ftypes[ftype[:3]]
+
+    if rdftype == None:
+        print("Couldn't find rdf type!")
+        return ''
+
+    else:
+        return rdftype
+
+def fcode_to_attributes(fcode):
+    attributes = fcodes.get(fcode, None)
+
+    if attributes == None:
+        return ()
+    else:
+        return attributes
+    
+    
 def triple_to_nt(sub, pred, obj):
     nt = StringBuilder()
     nt.append(sub.n3())
@@ -509,31 +846,59 @@ def triple_to_nt(sub, pred, obj):
 
     return nt.toString()
 
+def clean_uri(uri):
+    new_uri = StringBuilder()
+    allowed = r""""ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="""
+
+    for c in uri:
+        if c in allowed:
+                new_uri.append(c)
+
+    return new_uri.toString()
+
 def InsertFeature(feature, model, output_file):
     feature_uri = model['ID_URI_TEMPLATE'][0]
     subject_field = model['ID_URI_TEMPLATE'][1]
-    feature_uri = feature_uri + unicode(feature[subject_field])
+    feature_uri = clean_uri(feature_uri + unicode(feature[subject_field]))
     geometry_uri = model['GEOMETRY_URI_TEMPLATE'][0]
     geometry_field = model['GEOMETRY_URI_TEMPLATE'][1]
-    geometry_uri = geometry_uri + unicode(feature[geometry_field])
+    geometry_uri = clean_uri(geometry_uri + unicode(feature[geometry_field]))
     
     for k,v in model.iteritems():
         f_val = feature[k]
         if f_val == None or f_val == ' ':
             continue
-        elif len(v) == 3:
-            obj = Literal(v[2](v[1].format(f_val)))
+        elif len(v) == 3 and isinstance(v[1], URIRef):
+            obj = URIRef(v[1].format(v[2](f_val)))
+        elif len(v) == 3 or len(v) == 4:
+            if len(v) == 3:
+                obj = Literal(v[2](v[1].format(f_val)))
+            elif len(v) == 4:
+                obj = Literal(v[2](v[1].format(f_val)), datatype=v[3])
         else:
-            obj = URIRef(v[1].format(str(int(f_val))))
+            obj = URIRef(v[1].format(f_val))
 
         output_file.write(triple_to_nt(URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
             
     wkt = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type)
+    wkt2 = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type2)
     output_file.write(triple_to_nt(URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
     output_file.write(triple_to_nt(URIRef(feature_uri), rdf['type'], model['TYPE']))
+    # Now determine rdf type from NHD Ontology
+    if feature['FCode'] != None:
+        rdftype = ftype_to_rdftype(str(feature['FCode']))
+        if len(rdftype) > 0:
+            output_file.write(triple_to_nt(URIRef(feature_uri), rdf['type'], rdftype))
+        # Now parse attributes from last two digits of FCode
+        attributes = fcode_to_attributes(str(feature['FCode']))
+        for attr in attributes:
+            output_file.write(triple_to_nt(URIRef(feature_uri), attr[0], attr[1]))
+            
 
     # Create Geometry 
     output_file.write(triple_to_nt(URIRef(geometry_uri), geo['asWKT'], wkt))
+    output_file.write(triple_to_nt(URIRef(geometry_uri), URIRef('http://www.opengis.net/rdf#asWKT'), wkt2))
+    
     output_file.write(triple_to_nt(URIRef(geometry_uri), rdf['type'], geo['Geometry']))
 
     return True
@@ -564,7 +929,7 @@ def nm_mdb_to_n3(inputFile, outputFile):
         InsertLayer(table, o)
 
     print('All tables processed')
-    
+    o.close()
 
     return True
 
@@ -610,7 +975,7 @@ class ConversionGUI(object):
             if event.getActionCommand() == "ApproveSelection":
                 self.gui.inputFile = self.gui.chooser.getSelectedFile().getCanonicalPath()
                 suggestedOutputFile = self.gui.inputFile
-                suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
+                suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0] + '.n3'
         
                 self.gui.outputField.setText(suggestedOutputFile)
                 self.gui.outputFile = self.gui.outputField.getText()
