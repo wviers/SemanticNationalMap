@@ -6,6 +6,7 @@ import sys, os
 from struct import unpack, unpack_from, pack_into, pack
 import StringIO
 import array
+from datetime import datetime
 from   java.awt.event import ActionListener;
 from java.awt import Component, GridLayout, Dimension, BorderLayout
 from javax.swing import (BoxLayout, Box, ImageIcon, JButton, JFrame, JPanel,
@@ -18,6 +19,7 @@ from rdflib.graph import Graph, ConjunctiveGraph
 from rdflib import URIRef, Namespace
 from rdflib.term import Literal
 from rdflib.term import URIRef
+from rdflib.namespace import XSD
 
 
 # Constants for shape types
@@ -37,12 +39,13 @@ MULTIPOINTM = 28
 MULTIPATCH = 31
 
 def create_point(point_list):
-    wkt = 'POINT ( '
+    wkt = 'POINT ('
     
     for c in point_list:
-        wkt += ' {0}'.format(c)
+        wkt += '{0} '.format(c)
 
-    wkt += ' )'
+    wkt = wkt[:-1] # Remove last space from string
+    wkt += ')'
 
     return wkt
 
@@ -132,15 +135,29 @@ nhd_ontology = Namespace('http://cegis.usgs.gov/NHDOntology/')
 int_type =  '^^<http://www.w3.org/2001/XMLSchema#int>'
 string_type = '^^<http://www.w3.org/2001/XMLSchema#string>'
 wkt_type = URIRef('http://www.opengis.net/sf#wktLiteral')
-
+wkt_type2 = URIRef('http://rdf.opensahara.com/type/geo/wkt')
+def parse_date_to_iso(date_string):
+    new_date = datetime.strptime(date_string, "%a %b %d %H:%M:%S %Z %Y")
+    return new_date.isoformat()
+    
+def parse_resolution(resolution):
+    if int(resolution) == 0:
+        return "local"
+    elif int(resolution) == 1:
+        return "high"
+    elif int(resolution) == 2:
+        return "medium"
+    else:
+        return ""
+    
 layer_models = {}
 
 layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'), 
                             'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                              'TYPE': nhd['point'],
                              'FCode': (nhd['fCode'], nhd['fCode/{0}']),
-                             'FDate': (nhd['fDate'], '{0}', str),
-                             'Resolution': (nhd['resolution'], '{0}', int),
+                             'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
+                             'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
 							 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                              'GNIS_Name': (rdfs['label'], '{0}', unicode),
                              }
@@ -149,8 +166,8 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
                                 'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                                 'TYPE': nhd['flowline'],
                                 'FCode': (nhd['fCode'], nhd['fCode/{0}']),
-                                'FDate': (nhd['fDate'], '{0}', unicode),
-                                'Resolution': (nhd['resolution'], '{0}', int),
+                                'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
+                                'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                                 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                                 'GNIS_Name': (rdfs['label'], '{0}', unicode),
                                 'LengthKM': (nhd['lengthKM'], '{0}', float),
@@ -159,15 +176,15 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
                                 'WBAreaComID': (nhd['wbAreaComID'], nhdf['{0}']),
                                 'FType': (nhd['fType'], nhd['fType/{0}']),
                                 'Shape_Length': (nhd['shapeLength'], '{0}', float),
-                                'Enabled': (nhd['enabled'], '{0}', unicode)
+                                'Enabled': (nhd['enabled'], '{0}', lambda x: bool(int(x)))
                                 }
 
 layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                            'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                            'TYPE': nhd['area'],
-                           'FDate': (nhd['fDate'], '{0}', unicode),
+                           'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
                            'FCode': (nhd['fCode'], nhd['fCode/{0}']),
-                           'Resolution': (nhd['resolution'], '{0}', int),
+                           'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                            'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                            'GNIS_Name': (rdfs['label'], '{0}', unicode),
                            'AreaSqKm': (nhd['areaSqKM'], '{0}', float),
@@ -180,8 +197,8 @@ layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier')
 layer_models['NHDWaterBody'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                                 'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
                                 'TYPE': nhd['waterbody'],
-                                'FDate': (nhd['fDate'], '{0}', unicode),
-                                'Resolution': (nhd['resolution'], '{0}', int),
+                                'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
+                                'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                                 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                                 'GNIS_Name': (rdfs['label'], '{0}', unicode),
                                 'FCode': (nhd['fCode'], nhd['fCode/{0}']),
@@ -202,7 +219,7 @@ layer_models['Trans_RoadSegment'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_Fea
                                      'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                     'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'Interstate': (trans['interstate'], '{0}', unicode),
                                      'US_Route': (trans['usRoute'], '{0}', unicode),
                                      'State_Route': (trans['stateRoute'], '{0}', unicode),
@@ -230,7 +247,7 @@ layer_models['Trans_AirportPoint'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_Fe
                                      'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                     'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'FType': (trans['fType'], trans['fType/{0}']),
                                      'FCode': (trans['fCode'], trans['fCode/{0}']),
                                      'Airport_Class': (trans['airportClass'], '{0}', unicode),
@@ -247,7 +264,7 @@ layer_models['Trans_RailFeature'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_Fea
                                      'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                     'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'FCode': (trans['fCode'], trans['fCode/{0}']),
                                      'Name': (rdfs['label'], '{0}', unicode),
                                      'Rail_Usage': (trans['railUsage'], '{0}', unicode),
@@ -266,7 +283,7 @@ layer_models['Trans_AirportRunway'] = {'ID_URI_TEMPLATE': (transf[''], 'Source_F
                                        'Source_Originator': (trans['sourceOriginator'], '{0}', unicode),
                                        'Data_Security': (trans['dataSecurity'], '{0}', unicode),
                                        'Distribution_Policy': (trans['distributionPolicy'], '{0}', unicode),
-                                       'LoadDate': (trans['loadDate'], '{0}', unicode),
+                                       'LoadDate': (trans['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                        'FCode': (trans['fCode'], trans['fCode/{0}']),
                                        'Name': (rdfs['label'], '{0}', unicode),
                                        'FAA_Airport_Code': (trans['faaAirportCode'], '{0}', unicode),
@@ -287,7 +304,7 @@ layer_models['Struct_Point'] = {'ID_URI_TEMPLATE': (struct['Features/'], 'Source
                                 'Source_Originator': (struct['sourceOriginator'], '{0}', unicode),
                                 'Data_Security': (struct['dataSecurity'], '{0}', unicode),
                                 'Distribution_Policy': (struct['distributionPolicy'], '{0}', unicode),
-                                'LoadDate': (struct['loadDate'], '{0}', unicode),
+                                'LoadDate': (struct['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                 'FCode': (struct['fCode'], struct['fCode/{0}']),
                                 'FType': (struct['fType'], struct['fType/{0}']),
                                 'Name': (rdfs['label'], '{0}', unicode),
@@ -312,7 +329,7 @@ layer_models['GU_CountyOrEquivalent'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Fe
                                          'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                          'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                          'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                         'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                         'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                          'FCode': (gu['fCode'], gu['fCode/{0}']),
                                          'State_FIPSCode': (gu['stateFIPSCode'], '{0}', unicode),
                                          'State_Name': (gu['stateName'], '{0}', unicode),
@@ -334,7 +351,7 @@ layer_models['GU_IncorporatedPlace'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Fea
                                          'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                          'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                          'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                         'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                         'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                          'FCode': (gu['fCode'], gu['fCode/{0}']),
                                          'State_Name': (gu['stateName'], '{0}', unicode),
                                          'Place_FIPSCode': (gu['placeFIPSCode'], '{0}', unicode),
@@ -353,7 +370,7 @@ layer_models['GU_StateOrTerritory'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Feat
                                        'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                        'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                        'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                       'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                       'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                        'FCode': (gu['fCode'], gu['fCode/{0}']),
                                        'State_FIPSCode': (gu['stateFIPSCode'], '{0}', unicode),
                                        'State_Name': (rdfs['label'], '{0}', unicode),
@@ -372,7 +389,7 @@ layer_models['GU_MinorCivilDivision'] = {'ID_URI_TEMPLATE': (guf[''], 'Source_Fe
                                          'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                          'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                          'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                         'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                         'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                          'FCode': (gu['fCode'], gu['fCode/{0}']),
                                          'State_Name': (gu['stateName'], '{0}', unicode),
                                          'MinorCivilDivision_FIPSCode': (gu['minorCivilDivisonFIPSCode'], '{0}', unicode),
@@ -390,7 +407,7 @@ layer_models['GU_Jurisdictional'] = {'ID_URI_TEMPLATE': (guf[''], 'Permanent_Ide
                                      'Source_Originator': (gu['sourceOriginator'], '{0}', unicode),
                                      'Data_Security': (gu['dataSecurity'], '{0}', unicode),
                                      'Distribution_Policy': (gu['distributionPolicy'], '{0}', unicode),
-                                     'LoadDate': (gu['loadDate'], '{0}', unicode),
+                                     'LoadDate': (gu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                                      'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
                                      'Name': (rdfs['label'], '{0}', unicode),
                                      'AreaSqKM': (gu['areaSqKM'], '{0}', float),
@@ -411,7 +428,7 @@ layer_models['WBD_HU14'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_14'),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_12_Name': (rdf['label'], '{0}', unicode),
                             'HU_12_Type': (hu['hu14Type'], '{0}', unicode),
                             'HU_12_Mode': (hu['hu14Mod'],  '{0}', unicode),
@@ -424,11 +441,12 @@ layer_models['WBD_HU14'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_14'),
 layer_models['WBD_HU12'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_12'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_12'),
                             'TYPE': hu['WBD_HU12'],
+                            'HUC_12': (hu['HUC_12'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_12_Name': (rdfs['label'], '{0}', unicode),
                             'HU_12_Type': (hu['hu12Type'], '{0}', unicode),
                             'HU_12_Mode': (hu['hu12Mod'],  '{0}', unicode),
@@ -441,14 +459,15 @@ layer_models['WBD_HU12'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_12'),
 layer_models['WBD_HU8'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_8'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_8'),
                             'TYPE': hu['WBD_HU8'],
+                            'HUC_8': (hu['HUC_8'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_8_Name': (rdfs['label'], '{0}', unicode),
                             'HU_8_Type': (hu['hu8Type'], '{0}', unicode),
-                            'HU_8_Mode': (hu['hu8Mod'],  '{0}', unicode),
+                            'HU_8_Mod': (hu['hu8Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
@@ -456,14 +475,15 @@ layer_models['WBD_HU8'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_8'),
 layer_models['WBD_HU10'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_10'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_10'),
                             'TYPE': hu['WBD_HU10'],
+                            'HUC_10': (hu['HUC_10'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_10_Name': (rdfs['label'], '{0}', unicode),
                             'HU_10_Type': (hu['hu10Type'], '{0}', unicode),
-                            'HU_10_Mode': (hu['hu10Mod'],  '{0}', unicode),
+                            'HU_10_Mod': (hu['hu10Mod'],  '{0}', unicode),
                             'Shape_Length':  (hu['shapeLength'], '{0}', float),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
@@ -472,11 +492,12 @@ layer_models['WBD_HU10'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_10'),
 layer_models['WBD_HU6'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_6'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_6'),
                             'TYPE': hu['WBD_HU6'],
+                            'HUC_6': (hu['HUC_6'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode),
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_6_Name': (rdfs['label'], '{0}', unicode),
                             'HU_6_Type': (hu['hu6Type'], '{0}', unicode),
                             'HU_6_Mode': (hu['hu6Mod'],  '{0}', unicode),
@@ -487,11 +508,12 @@ layer_models['WBD_HU6'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_6'),
 layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'GEOMETRY_URI_TEMPLATE': (hug[''], 'HUC_4'),
                             'TYPE': hu['WBD_HU4'],
+                            'HUC_4': (hu['HUC_4'], '{0}', int),
                             'Gaz_ID': (hu['gazID'], '{0}', unicode), 
                             'Area_Acres': (hu['areaAcres'], '{0}', float),
                             'Area_SqKm': (hu['areaSqKm'], '{0}', float),
                             'States':    (hu['states'], '{0}', unicode),
-                            'LoadDate':  (hu['loadDate'], '{0}', unicode),
+                            'LoadDate':  (hu['loadDate'], '{0}', parse_date_to_iso, XSD.date),
                             'HU_4_Name': (rdfs['label'], '{0}', unicode),
                             'HU_4_Type': (hu['hu4Type'], '{0}', unicode),
                             'HU_4_Mode': (hu['hu4Mod'],  '{0}', unicode),
@@ -825,29 +847,41 @@ def triple_to_nt(sub, pred, obj):
     return nt.toString()
 
 def clean_uri(uri):
+    new_uri = StringBuilder()
     allowed = r""""ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="""
-    return uri
-    
+
+    for c in uri:
+        if c in allowed:
+                new_uri.append(c)
+
+    return new_uri.toString()
+
 def InsertFeature(feature, model, output_file):
     feature_uri = model['ID_URI_TEMPLATE'][0]
     subject_field = model['ID_URI_TEMPLATE'][1]
-    feature_uri = feature_uri + unicode(feature[subject_field])
+    feature_uri = clean_uri(feature_uri + unicode(feature[subject_field]))
     geometry_uri = model['GEOMETRY_URI_TEMPLATE'][0]
     geometry_field = model['GEOMETRY_URI_TEMPLATE'][1]
-    geometry_uri = geometry_uri + unicode(feature[geometry_field])
+    geometry_uri = clean_uri(geometry_uri + unicode(feature[geometry_field]))
     
     for k,v in model.iteritems():
         f_val = feature[k]
         if f_val == None or f_val == ' ':
             continue
-        elif len(v) == 3:
-            obj = Literal(v[2](v[1].format(f_val)))
+        elif len(v) == 3 and isinstance(v[1], URIRef):
+            obj = URIRef(v[1].format(v[2](f_val)))
+        elif len(v) == 3 or len(v) == 4:
+            if len(v) == 3:
+                obj = Literal(v[2](v[1].format(f_val)))
+            elif len(v) == 4:
+                obj = Literal(v[2](v[1].format(f_val)), datatype=v[3])
         else:
-            obj = URIRef(v[1].format(str(int(f_val))))
+            obj = URIRef(v[1].format(f_val))
 
         output_file.write(triple_to_nt(URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
             
     wkt = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type)
+    wkt2 = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type2)
     output_file.write(triple_to_nt(URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
     output_file.write(triple_to_nt(URIRef(feature_uri), rdf['type'], model['TYPE']))
     # Now determine rdf type from NHD Ontology
@@ -863,6 +897,8 @@ def InsertFeature(feature, model, output_file):
 
     # Create Geometry 
     output_file.write(triple_to_nt(URIRef(geometry_uri), geo['asWKT'], wkt))
+    output_file.write(triple_to_nt(URIRef(geometry_uri), URIRef('http://www.opengis.net/rdf#asWKT'), wkt2))
+    
     output_file.write(triple_to_nt(URIRef(geometry_uri), rdf['type'], geo['Geometry']))
 
     return True
@@ -893,7 +929,7 @@ def nm_mdb_to_n3(inputFile, outputFile):
         InsertLayer(table, o)
 
     print('All tables processed')
-    
+    o.close()
 
     return True
 
@@ -939,7 +975,7 @@ class ConversionGUI(object):
             if event.getActionCommand() == "ApproveSelection":
                 self.gui.inputFile = self.gui.chooser.getSelectedFile().getCanonicalPath()
                 suggestedOutputFile = self.gui.inputFile
-                suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0]
+                suggestedOutputFile = os.path.splitext(suggestedOutputFile)[0] + '.n3'
         
                 self.gui.outputField.setText(suggestedOutputFile)
                 self.gui.outputFile = self.gui.outputField.getText()
