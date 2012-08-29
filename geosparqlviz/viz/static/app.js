@@ -109,13 +109,8 @@ function init(){
 							'/services/TNM_Small_Scale_Imagery/MapServer/export',
 							{});
     
-    
-    
-    var nationalMapWMS = new OpenLayers.Layer.WMS('NationalMapLarge',
-						  'http://raster.nationalmap.gov/arcgis/services/Combined/' +
-						  'TNM_Large_Scale_Imagery/MapServer/WMSServer',
-						  {layers: '0'});
-    
+    var nationalMapWMS = new OpenLayers.Layer.ArcGIS93Rest('NationalMapLarge',
+							   'http://isse.cr.usgs.gov/ArcGIS/rest/services/TNM_Large_Scale_Imagery/MapServer/export', {});
     
     vectors = new OpenLayers.Layer.Vector('Vector Layer');
     
