@@ -7,6 +7,7 @@ wviers@usgs.gov
 
 ***Getting data from the National Map***
 The file format the conversion program accepts as input is a Personal GDB .mdb file.
+(The tool is formatted to only accept .mdb files downloaded from The Nationale Map)
 
 These files can be downloaded from the National Map via the National Map Viewer
 interface (http://viewer.nationalmap.gov/viewer/).
