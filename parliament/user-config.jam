@@ -1,5 +1,0 @@
-
-# This file is used to configure the Boost.Build installation.
-
-# Toolset declarations (the first one is the default):
-using gcc ;
