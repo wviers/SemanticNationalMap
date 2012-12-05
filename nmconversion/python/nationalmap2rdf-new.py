@@ -130,6 +130,7 @@ gug = Namespace('http://cegis.usgs.gov/rdf/gu/Geometries/')
 hu = Namespace('http://cegis.usgs.gov/rdf/nhd/huc/')
 huf = Namespace('http://cegis.usgs.gov/rdf/nhd/hucf/')
 hug = Namespace('http://cegis.usgs.gov/rdf/nhd/hucg/')
+grid = Namespace('http://cegis.usgs.gov/rdf/grid/')
 nhd_ontology = Namespace('http://cegis.usgs.gov/NHDOntology/')
 
 int_type =  '^^<http://www.w3.org/2001/XMLSchema#int>'
@@ -155,6 +156,7 @@ layer_models = {}
 layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'), 
                             'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                              'TYPE': nhd['point'],
+                             'Permanent_Identifier': (nhd['permanentIdentifier'], '{0}', unicode, XSD.string),
                              'FCode': (nhd['fCode'], nhd['fCode/{0}']),
                              'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
                              'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
@@ -165,6 +167,7 @@ layer_models['NHDPoint'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'
 layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                                 'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                                 'TYPE': nhd['flowline'],
+                                'Permanent_Identifier': (nhd['permanentIdentifier'], '{0}', unicode, XSD.string),
                                 'FCode': (nhd['fCode'], nhd['fCode/{0}']),
                                 'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
                                 'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
@@ -182,6 +185,7 @@ layer_models['NHDFlowline'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifi
 layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                            'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'Permanent_Identifier'),
                            'TYPE': nhd['area'],
+                           'Permanent_Identifier': (nhd['permanentIdentifier'], '{0}', unicode, XSD.string),
                            'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
                            'FCode': (nhd['fCode'], nhd['fCode/{0}']),
                            'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
@@ -197,6 +201,7 @@ layer_models['NHDArea'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier')
 layer_models['NHDWaterBody'] = {'ID_URI_TEMPLATE': (nhdf[''], 'Permanent_Identifier'),
                                 'GEOMETRY_URI_TEMPLATE': (nhdg[''], 'ComID'),
                                 'TYPE': nhd['waterbody'],
+                                'Permanent_Identifier': (nhd['permanentIdentifier'], '{0}', unicode, XSD.string),
                                 'FDate': (nhd['fDate'], '{0}', parse_date_to_iso, XSD.date),
                                 'Resolution': (nhd['resolution'], nhd['resolution/{0}'], parse_resolution),
                                 'GNIS_ID': (gnis['id'], gnis['Features/{0}']),
@@ -521,6 +526,17 @@ layer_models['WBD_HU4'] = {'ID_URI_TEMPLATE': (huf[''], 'HUC_4'),
                             'Shape_Area':   (hu['shapeArea'],    '{0}', float),
                             }
 
+layer_models['CellGrid_7_5Minute'] = {'ID_URI_TEMPLATE': (grid[''], 'GLOBALID'),
+                                      'GEOMETRY_URI_TEMPLATE': (grid['geometry/'], 'GLOBALID'),
+                                      'CELL_ID': (grid['cellID'], '{0}', int),
+                                      'TYPE': URIRef('http://cegis.usgs.gov/7.5minuteCell'),
+                                      'CELL_NAME': (rdfs['label'], '{0}', unicode),
+                                      'PRIMARY_STATE': (grid['primaryState'], '{0}', unicode),
+                                      'STATE_ALPHA': (grid['state'], '{0}', unicode),
+                                      'SEQ_GOVTUNITS': (grid['seqGovtUnits'], '{0}', unicode),
+                                      }
+                                      
+
 ftypes = {'558': nhd_ontology['ArtificialPath'],
           '336': nhd_ontology['CanalOrDitch'],
           '566': nhd_ontology['Coastline'],
@@ -549,7 +565,6 @@ ftypes = {'558': nhd_ontology['ArtificialPath'],
           '478': nhd_ontology['Tunnel'],
           '483': nhd_ontology['Wall'],
           '487': nhd_ontology['Waterfall'],
-          '343': nhd_ontology['DamOrWier'],
           '367': nhd_ontology['GagingStation'],
           '441': nhd_ontology['Rock'],
           '458': nhd_ontology['SpringOrSeep'],
@@ -817,7 +832,7 @@ fcodes = {'33601': ((nhd_ontology['CanalOrDitchType'],
           
 def ftype_to_rdftype(ftype):
     """ ftype is a string """
-    rdftype = ftypes[ftype[:3]]
+    rdftype = ftypes.get(ftype[:3], None)
 
     if rdftype == None:
         print("Couldn't find rdf type!")
@@ -829,8 +844,8 @@ def ftype_to_rdftype(ftype):
 def fcode_to_attributes(fcode):
     attributes = fcodes.get(fcode, None)
 
-    if attributes == None:
-        return ()
+    if attributes == None: 
+       return ()
     else:
         return attributes
     
@@ -879,20 +894,23 @@ def InsertFeature(feature, model, output_file):
             obj = URIRef(v[1].format(f_val))
 
         output_file.write(triple_to_nt(URIRef(feature_uri), URIRef(v[0].format(f_val)), obj))
-            
-    wkt = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type)
-    wkt2 = Literal(binary_shape_to_wkt(feature['Shape']), datatype=wkt_type2)
+    binshape = feature['Shape']
+    if binshape == None:
+        binshape = feature['SHAPE']
+    wkt = Literal(binary_shape_to_wkt(binshape), datatype=wkt_type)
+    wkt2 = Literal(binary_shape_to_wkt(binshape), datatype=wkt_type2)
     output_file.write(triple_to_nt(URIRef(feature_uri), geo['hasGeometry'], URIRef(geometry_uri)))
     output_file.write(triple_to_nt(URIRef(feature_uri), rdf['type'], model['TYPE']))
     # Now determine rdf type from NHD Ontology
-    if feature['FCode'] != None:
-        rdftype = ftype_to_rdftype(str(feature['FCode']))
-        if len(rdftype) > 0:
+    if 'FCode' in feature:
+        if str(feature['FType']) in ftypes:
+            rdftype = ftype_to_rdftype(str(feature['FCode']))
+            
             output_file.write(triple_to_nt(URIRef(feature_uri), rdf['type'], rdftype))
-        # Now parse attributes from last two digits of FCode
-        attributes = fcode_to_attributes(str(feature['FCode']))
-        for attr in attributes:
-            output_file.write(triple_to_nt(URIRef(feature_uri), attr[0], attr[1]))
+            # Now parse attributes from last two digits of FCode
+            attributes = fcode_to_attributes(str(feature['FCode']))
+            for attr in attributes:
+                output_file.write(triple_to_nt(URIRef(feature_uri), attr[0], attr[1]))
             
 
     # Create Geometry 
