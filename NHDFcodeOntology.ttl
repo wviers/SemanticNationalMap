@@ -1,0 +1,1097 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://cegis.usgs.gov/NHDOntology/#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@base <http://cegis.usgs.gov/NHDOntology/> .
+
+<http://cegis.usgs.gov/NHDOntology/> rdf:type owl:Ontology .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Datatypes
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://cegis.usgs.gov/NHDOntology/CanalOrDitchType
+
+<http://cegis.usgs.gov/NHDOntology/CanalOrDitchType> rdf:type owl:ObjectProperty ;
+                                                     
+                                                     rdfs:range <http://cegis.usgs.gov/NHDOntology/Aqueduct> ;
+                                                     
+                                                     rdfs:domain <http://cegis.usgs.gov/NHDOntology/CanalOrDitch> ;
+                                                     
+                                                     rdfs:range <http://cegis.usgs.gov/NHDOntology/Stormwater> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/ConstructionMaterial
+
+<http://cegis.usgs.gov/NHDOntology/ConstructionMaterial> rdf:type owl:ObjectProperty ;
+                                                         
+                                                         rdfs:domain <http://cegis.usgs.gov/NHDOntology/DamOrWeir> ;
+                                                         
+                                                         rdfs:range <http://cegis.usgs.gov/NHDOntology/Earthen> ,
+                                                                    <http://cegis.usgs.gov/NHDOntology/NonEarthen> ;
+                                                         
+                                                         rdfs:domain <http://cegis.usgs.gov/NHDOntology/Reservoir> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/HydrographicCategory
+
+<http://cegis.usgs.gov/NHDOntology/HydrographicCategory> rdf:type owl:ObjectProperty ;
+                                                         
+                                                         rdfs:range <http://cegis.usgs.gov/NHDOntology/Ephemeral> ,
+                                                                    <http://cegis.usgs.gov/NHDOntology/Intermittent> ;
+                                                         
+                                                         rdfs:domain <http://cegis.usgs.gov/NHDOntology/LakeOrPond> ;
+                                                         
+                                                         rdfs:range <http://cegis.usgs.gov/NHDOntology/Perennial> ;
+                                                         
+                                                         rdfs:domain <http://cegis.usgs.gov/NHDOntology/Reservoir> ,
+                                                                     <http://cegis.usgs.gov/NHDOntology/StreamOrRiver> ,
+                                                                     <http://cegis.usgs.gov/NHDOntology/SwampOrMarsh> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/InundationControlStatus
+
+<http://cegis.usgs.gov/NHDOntology/InundationControlStatus> rdf:type owl:ObjectProperty ;
+                                                            
+                                                            rdfs:range <http://cegis.usgs.gov/NHDOntology/Controlled> ;
+                                                            
+                                                            rdfs:domain <http://cegis.usgs.gov/NHDOntology/InundationArea> ;
+                                                            
+                                                            rdfs:range <http://cegis.usgs.gov/NHDOntology/NotControlled> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/PipelineType
+
+<http://cegis.usgs.gov/NHDOntology/PipelineType> rdf:type owl:ObjectProperty ;
+                                                 
+                                                 rdfs:range <http://cegis.usgs.gov/NHDOntology/Aqueduct> ,
+                                                            <http://cegis.usgs.gov/NHDOntology/GeneralCase> ,
+                                                            <http://cegis.usgs.gov/NHDOntology/Penstock> ;
+                                                 
+                                                 rdfs:domain <http://cegis.usgs.gov/NHDOntology/Pipeline> ;
+                                                 
+                                                 rdfs:range <http://cegis.usgs.gov/NHDOntology/Siphon> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/PositionalAccuracy
+
+<http://cegis.usgs.gov/NHDOntology/PositionalAccuracy> rdf:type owl:ObjectProperty ;
+                                                       
+                                                       rdfs:range <http://cegis.usgs.gov/NHDOntology/Approximate> ,
+                                                                  <http://cegis.usgs.gov/NHDOntology/Definite> ,
+                                                                  <http://cegis.usgs.gov/NHDOntology/Indefinite> ;
+                                                       
+                                                       rdfs:domain <http://cegis.usgs.gov/NHDOntology/SoundingDatumLine> ,
+                                                                   <http://cegis.usgs.gov/NHDOntology/SpecialUseZoneLimit> ,
+                                                                   <http://cegis.usgs.gov/NHDOntology/UndergroundConduit> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Product
+
+<http://cegis.usgs.gov/NHDOntology/Product> rdf:type owl:ObjectProperty ;
+                                            
+                                            rdfs:domain <http://cegis.usgs.gov/NHDOntology/Pipeline> ;
+                                            
+                                            rdfs:range <http://cegis.usgs.gov/NHDOntology/Water> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/RelationshipToSurface
+
+<http://cegis.usgs.gov/NHDOntology/RelationshipToSurface> rdf:type owl:ObjectProperty ;
+                                                          
+                                                          rdfs:range <http://cegis.usgs.gov/NHDOntology/AboveWater> ,
+                                                                     <http://cegis.usgs.gov/NHDOntology/AtOrNear> ,
+                                                                     <http://cegis.usgs.gov/NHDOntology/Elevated> ;
+                                                          
+                                                          rdfs:domain <http://cegis.usgs.gov/NHDOntology/Pipeline> ,
+                                                                      <http://cegis.usgs.gov/NHDOntology/Rock> ;
+                                                          
+                                                          rdfs:range <http://cegis.usgs.gov/NHDOntology/Underground> ,
+                                                                     <http://cegis.usgs.gov/NHDOntology/Underwater> ,
+                                                                     <http://cegis.usgs.gov/NHDOntology/Unspecified> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/ReservoirType
+
+<http://cegis.usgs.gov/NHDOntology/ReservoirType> rdf:type owl:ObjectProperty ;
+                                                  
+                                                  rdfs:range <http://cegis.usgs.gov/NHDOntology/Aquaculture> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/DecorativePool> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/Disposal> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/DisposalTailingsPond> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/DisposalUnspecified> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/Evaporator> ;
+                                                  
+                                                  rdfs:domain <http://cegis.usgs.gov/NHDOntology/Reservoir> ;
+                                                  
+                                                  rdfs:range <http://cegis.usgs.gov/NHDOntology/SwimmingPool> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/Treatment> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/TreatmentCoolingPond> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/TreatmentFiltrationPond> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/TreatmentSettlingPond> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/TreatmentSewageTreatmentPond> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/Unspecified> ,
+                                                             <http://cegis.usgs.gov/NHDOntology/WaterStorage> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SpecialUseZoneType
+
+<http://cegis.usgs.gov/NHDOntology/SpecialUseZoneType> rdf:type owl:ObjectProperty ;
+                                                       
+                                                       rdfs:range <http://cegis.usgs.gov/NHDOntology/DumpSite> ;
+                                                       
+                                                       rdfs:domain <http://cegis.usgs.gov/NHDOntology/SpecialUseZone> ;
+                                                       
+                                                       rdfs:range <http://cegis.usgs.gov/NHDOntology/SpoilArea> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Stage
+
+<http://cegis.usgs.gov/NHDOntology/Stage> rdf:type owl:ObjectProperty ;
+                                          
+                                          rdfs:range <http://cegis.usgs.gov/NHDOntology/AverageWaterElevation> ,
+                                                     <http://cegis.usgs.gov/NHDOntology/DateOfPhotography> ,
+                                                     <http://cegis.usgs.gov/NHDOntology/FloodElevation> ,
+                                                     <http://cegis.usgs.gov/NHDOntology/HighWaterElevation> ;
+                                          
+                                          rdfs:domain <http://cegis.usgs.gov/NHDOntology/InundationArea> ,
+                                                      <http://cegis.usgs.gov/NHDOntology/LakeOrPond> ;
+                                          
+                                          rdfs:range <http://cegis.usgs.gov/NHDOntology/NormalPool> ,
+                                                     <http://cegis.usgs.gov/NHDOntology/SpillwayElevation> .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://cegis.usgs.gov/NHDOntology/Abandoned
+
+<http://cegis.usgs.gov/NHDOntology/Abandoned> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                              
+                                              rdfs:comment "Intact but not maintained or intended for use.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/AboveWater
+
+<http://cegis.usgs.gov/NHDOntology/AboveWater> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "Exposed at mean lower low water."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Approximate
+
+<http://cegis.usgs.gov/NHDOntology/Approximate> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                
+                                                rdfs:comment "Conditions permit the feature to be confidently positioned between 0.02\" and 0.1\", at map scale, of its true ground position."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Aquaculture
+
+<http://cegis.usgs.gov/NHDOntology/Aquaculture> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                
+                                                rdfs:comment "For rearing of finfish, shellfish, or aquatic plants. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Aqueduct
+
+<http://cegis.usgs.gov/NHDOntology/Aqueduct> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment "A structure designed to transport domestic or industrial water from a supply source to a distribution point, often by gravity. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/AreaOfComplexChannels
+
+<http://cegis.usgs.gov/NHDOntology/AreaOfComplexChannels> rdf:type owl:Class ;
+                                                          
+                                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                          
+                                                          rdfs:comment "An area where a stream or river flows in an intricate network of sediment-driven interlacing channels. Not named features. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/AreaToBeSubmerged
+
+<http://cegis.usgs.gov/NHDOntology/AreaToBeSubmerged> rdf:type owl:Class ;
+                                                      
+                                                      rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                      
+                                                      rdfs:comment "The known extent of the intended lake that will be created behind a dam under construction. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/ArtificialPath
+
+<http://cegis.usgs.gov/NHDOntology/ArtificialPath> rdf:type owl:Class ;
+                                                   
+                                                   rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                   
+                                                   rdfs:comment "A surrogate for general flow direction in NHDWaterbodies and NHDAreas. Artificial Paths carry the name of the flowline feature. NHDArea StreamRivers will have an Artificial Path that will carry the name of the River. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/AtOrNear
+
+<http://cegis.usgs.gov/NHDOntology/AtOrNear> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment "At or slightly above the surface"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/AverageWaterElevation
+
+<http://cegis.usgs.gov/NHDOntology/AverageWaterElevation> rdf:type owl:Class ;
+                                                          
+                                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                          
+                                                          rdfs:comment "The stage of a natural water body that prevails for the greater part of  the year."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/BayOrInlet
+
+<http://cegis.usgs.gov/NHDOntology/BayOrInlet> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                               
+                                               rdfs:comment "A water area that is an opening of the sea/ocean into the land, or of an estuary, lake, or river into its shore. BayInlets are used in the NHD to provide named areas for other hydrographic features, and must overlap Estuary, LakePond, SeaOcean, or StreamRiver. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Bridge
+
+<http://cegis.usgs.gov/NHDOntology/Bridge> rdf:type owl:Class ;
+                                           
+                                           rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                           
+                                           rdfs:comment "A structure spanning and providing passage of a waterway over another waterway, railroad, or other obstacle. Bridge also exists as an NHDLine. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/CanalOrDitch
+
+<http://cegis.usgs.gov/NHDOntology/CanalOrDitch> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                 
+                                                 rdfs:comment "An artificial open waterway constructed to transport water, to irrigate or drain land, to connect two or more bodies of water, or to serve as a waterway for watercraft. CanalDitch also exists as an NHDFlowline. May be a named feature"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Coastline
+
+<http://cegis.usgs.gov/NHDOntology/Coastline> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                              
+                                              rdfs:comment "A line of contact between the open sea and the land, including imaginary lines separating inland water bodies from the open sea. The NHD acquires coastline data from the National Ocean and Atmospheric Agency (NOAA) and it is not a product of the USGS. Coastline in the NHD is a representation of the Mean High Water (MHW) as calculated by NOAA and may not match orthoimagery. Coastline in the NHD could be altered but must have an accompanying metadata record that identifies the scientific method used to to calibrate the coastline to a known vertical datum. Coastline may be a named feature."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Connector
+
+<http://cegis.usgs.gov/NHDOntology/Connector> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                              
+                                              rdfs:comment "A known, but nonspecific, invisible connection between two nonadjacent network segments. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Controlled
+
+<http://cegis.usgs.gov/NHDOntology/Controlled> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "Structures, such as DAM/WEIR or LEVEE, exist to control the water and inundate specific areas."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/DamOrWeir
+
+<http://cegis.usgs.gov/NHDOntology/DamOrWeir> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                              
+                                              rdfs:comment "A barrier constructed to control the flow or raise the level of water. DamWeir also exists as an NHDPoint or as an NHDLine. When DamWeir is a nonearthen structure, it will be coincident with a  Nonearthen Shore Feature. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/DateOfPhotography
+
+<http://cegis.usgs.gov/NHDOntology/DateOfPhotography> rdf:type owl:Class ;
+                                                      
+                                                      rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                      
+                                                      rdfs:comment "The stage that exists at the date of photography."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/DecorativePool
+
+<http://cegis.usgs.gov/NHDOntology/DecorativePool> rdf:type owl:Class ;
+                                                   
+                                                   rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                   
+                                                   rdfs:comment "For improving the aesthetic appearance of the landscape.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Definite
+
+<http://cegis.usgs.gov/NHDOntology/Definite> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment """Conditions permit the feature to be confidently positioned. Horizontal data are confidently positioned within 0.02\", at map scale, of the true ground position. Vertical data are confidently positioned within one-half contour interval of the true ground position.
+  """^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Disposal
+
+<http://cegis.usgs.gov/NHDOntology/Disposal> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment "For disposal. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/DisposalTailingsPond
+
+<http://cegis.usgs.gov/NHDOntology/DisposalTailingsPond> rdf:type owl:Class ;
+                                                         
+                                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/DisposalUnspecified
+
+<http://cegis.usgs.gov/NHDOntology/DisposalUnspecified> rdf:type owl:Class ;
+                                                        
+                                                        rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/DumpSite
+
+<http://cegis.usgs.gov/NHDOntology/DumpSite> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment "For dumping of discarded materials.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Earthen
+
+<http://cegis.usgs.gov/NHDOntology/Earthen> rdf:type owl:Class ;
+                                            
+                                            rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                            
+                                            rdfs:comment "The predominant material used in construction is earth, or a combination of earth and rock. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Elevated
+
+<http://cegis.usgs.gov/NHDOntology/Elevated> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment "Supported above the earth"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Ephemeral
+
+<http://cegis.usgs.gov/NHDOntology/Ephemeral> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                              
+                                              rdfs:comment "Contains water only during or after a local rainstorm or heavy snowmelt."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Estuary
+
+<http://cegis.usgs.gov/NHDOntology/Estuary> rdf:type owl:Class ;
+                                            
+                                            rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                            
+                                            rdfs:comment "\"An estuary is a semi-enclosed coastal body of water which has a free connection with the open sea and within which sea water is measurably diluted with fresh water derived from land drainage\" (Cameron and Pritchard, 1963). May be a named feature. An Estuary is defined by the NOAA's Coastal Aquatic Framework (CAF) or local information concerning the extent of the mixed zone of fresh and salt water. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Evaporator
+
+<http://cegis.usgs.gov/NHDOntology/Evaporator> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "For the natural evaporation of water to allow harvesting of mineral concentrates. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/FloodElevation
+
+<http://cegis.usgs.gov/NHDOntology/FloodElevation> rdf:type owl:Class ;
+                                                   
+                                                   rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                   
+                                                   rdfs:comment "The stage that prevails when a natural water body is at or near capacity"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Flume
+
+<http://cegis.usgs.gov/NHDOntology/Flume> rdf:type owl:Class ;
+                                          
+                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                          
+                                          rdfs:comment "An open, inclined, artificial channel constructed of wood, metal, or concrete; generally elevated. Flume may also exist as an NHDArea. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Foreshore
+
+<http://cegis.usgs.gov/NHDOntology/Foreshore> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                              
+                                              rdfs:comment "The area of shore that lies between the limits of the mean high water (MHW) and mean low low water (MLLW) tidal marks and is exposed during low tides. The NHD acquires Foreshore data from the National Ocean and Atmospheric Agency (NOAA) and it is not a product of the USGS. May be a named feature."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/GagingStation
+
+<http://cegis.usgs.gov/NHDOntology/GagingStation> rdf:type owl:Class ;
+                                                  
+                                                  rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                  
+                                                  rdfs:comment "A structure used to measure the characteristics of a hydrographic feature. Stream Gages are usually captured on the flowline and not necessarily on the physical location of the monitoring station. Stream Gages are also available as a Point Event.  Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Gate
+
+<http://cegis.usgs.gov/NHDOntology/Gate> rdf:type owl:Class ;
+                                         
+                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                         
+                                         rdfs:comment "A structure that may be swung, drawn, or lowered to block an entrance or passageway. Gate may also be found as a Line feature. Gate also exists as an NHDLine. Not a named feature.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/GeneralCase
+
+<http://cegis.usgs.gov/NHDOntology/GeneralCase> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                
+                                                rdfs:comment "A structure designed to transport domestic or industrial water from a supply source to a distribution point, often by gravity. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/HazardZone
+
+<http://cegis.usgs.gov/NHDOntology/HazardZone> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                               
+                                               rdfs:comment "An area identified as a danger to maritime navigation. Not a named feature."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/HighWaterElevation
+
+<http://cegis.usgs.gov/NHDOntology/HighWaterElevation> rdf:type owl:Class ;
+                                                       
+                                                       rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                       
+                                                       rdfs:comment "The stage that prevails when a natural water body is at or near capacity.    "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/IceMass
+
+<http://cegis.usgs.gov/NHDOntology/IceMass> rdf:type owl:Class ;
+                                            
+                                            rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                            
+                                            rdfs:comment "A field of ice usually formed in regions of perennial frost. Ice Mass primarily consists of glaciers. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Indefinite
+
+<http://cegis.usgs.gov/NHDOntology/Indefinite> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "Conditions prevent the feature from being confidently positioned. Horizontal data cannot be confidently positioned within 0.02\", at map scale, of the true ground position.  Vertical data cannot be confidently positioned within one-half contour interval of the true ground position"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Intermittent
+
+<http://cegis.usgs.gov/NHDOntology/Intermittent> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                 
+                                                 rdfs:comment "For long or short-term storage of water.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/InundationArea
+
+<http://cegis.usgs.gov/NHDOntology/InundationArea> rdf:type owl:Class ;
+                                                   
+                                                   rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                   
+                                                   rdfs:comment "An area of land subject to flooding. May be a named feature.   "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/LakeOrPond
+
+<http://cegis.usgs.gov/NHDOntology/LakeOrPond> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                               
+                                               rdfs:comment "A standing body of water with a predominantly natural shoreline surrounded by land or a flooded river system where a dam has been built to withhold water. May be a named feature. Elevation may be set for LakePond features, but must use NGVD 1929 in meters as the vertical datum. Elevation is only used on features where a dam controls the elevation of the water."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Levee
+
+<http://cegis.usgs.gov/NHDOntology/Levee> rdf:type owl:Class ;
+                                          
+                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                          
+                                          rdfs:comment "An embankment built to prevent flooding or to control or confine the flow of liquids. Levee also exists as an NHDArea. Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/LockChamber
+
+<http://cegis.usgs.gov/NHDOntology/LockChamber> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                
+                                                rdfs:comment "An enclosure on a waterway used to raise and lower vessels as they pass from one level to another. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/NHDFeature
+
+<http://cegis.usgs.gov/NHDOntology/NHDFeature> rdf:type owl:Class .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes
+
+<http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> rdf:type owl:Class .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/NonEarthen
+
+<http://cegis.usgs.gov/NHDOntology/NonEarthen> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "The predominant material used in construction is concrete, brick, or stone."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/NonearthenShore
+
+<http://cegis.usgs.gov/NHDOntology/NonearthenShore> rdf:type owl:Class ;
+                                                    
+                                                    rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                    
+                                                    rdfs:comment "A structure built of stone, brick, concrete, or other building materials that borders a body of water. Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/NormalPool
+
+<http://cegis.usgs.gov/NHDOntology/NormalPool> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "The stage of an artificially impounded water body that prevails for the greater part of the year."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/NotControlled
+
+<http://cegis.usgs.gov/NHDOntology/NotControlled> rdf:type owl:Class ;
+                                                  
+                                                  rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                  
+                                                  rdfs:comment "No controlling structures exist. Flooding is natural and periodic."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Operational
+
+<http://cegis.usgs.gov/NHDOntology/Operational> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                
+                                                rdfs:comment "Usable and intended for use"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Penstock
+
+<http://cegis.usgs.gov/NHDOntology/Penstock> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                             
+                                             rdfs:comment "A structure designed to transport domestic or industrial water from a supply source to a distribution point, often by gravity. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Perennial
+
+<http://cegis.usgs.gov/NHDOntology/Perennial> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                              
+                                              rdfs:comment "For long or short-term storage of water.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Pipeline
+
+<http://cegis.usgs.gov/NHDOntology/Pipeline> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                             
+                                             rdfs:comment "A closed conduit, with pumps, valves and control devices, for conveying fluids, gases, or finely divided solids. Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Playa
+
+<http://cegis.usgs.gov/NHDOntology/Playa> rdf:type owl:Class ;
+                                          
+                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                          
+                                          rdfs:comment "The flat area at the lowest part of an undrained desert basin, generally devoid of vegetation. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Rapids
+
+<http://cegis.usgs.gov/NHDOntology/Rapids> rdf:type owl:Class ;
+                                           
+                                           rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                           
+                                           rdfs:comment "An area of swift current in a stream or river, characterized by standing waves or by boulders and rocks. Rapids also exist as NHDLine or as NHDArea. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Reef
+
+<http://cegis.usgs.gov/NHDOntology/Reef> rdf:type owl:Class ;
+                                         
+                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                         
+                                         rdfs:comment "A Chain of rocks or coral at or near the surface of the water. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Reservoir
+
+<http://cegis.usgs.gov/NHDOntology/Reservoir> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                              
+                                              rdfs:comment "A constructed basin formed to contain water or other liquids. Reservoirs may also be found as a Waterbody. Reservoir also exists as an NHDWaterbody. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Rock
+
+<http://cegis.usgs.gov/NHDOntology/Rock> rdf:type owl:Class ;
+                                         
+                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                         
+                                         rdfs:comment "A concreted mass of stony material. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SeaOrOcean
+
+<http://cegis.usgs.gov/NHDOntology/SeaOrOcean> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                               
+                                               rdfs:comment "The great body of salt water that covers much of the earth. May be a named feature."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SinkOrRise
+
+<http://cegis.usgs.gov/NHDOntology/SinkOrRise> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                               
+                                               rdfs:comment "The place at which a stream disappears underground or reappears at the surface in a karst area. SinkRise also exists as an NHDPoint. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Siphon
+
+<http://cegis.usgs.gov/NHDOntology/Siphon> rdf:type owl:Class ;
+                                           
+                                           rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                           
+                                           rdfs:comment "Designed to convey water by gravitational force over, or under, an obstruction.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SoundingDatumLine
+
+<http://cegis.usgs.gov/NHDOntology/SoundingDatumLine> rdf:type owl:Class ;
+                                                      
+                                                      rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                      
+                                                      rdfs:comment "A line representing the bathymetric contour of mean low low water (MLLW) for which a foreshore feature is present or visible. The NHD acquires Sounding Datum Line data from the National Ocean and Atmospheric Agency (NOAA) and it is not a product of the USGS. Not a named feature.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SpecialUseZone
+
+<http://cegis.usgs.gov/NHDOntology/SpecialUseZone> rdf:type owl:Class ;
+                                                   
+                                                   rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                   
+                                                   rdfs:comment "An area where distinctive types of maritime activities occur. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SpecialUseZoneLimit
+
+<http://cegis.usgs.gov/NHDOntology/SpecialUseZoneLimit> rdf:type owl:Class ;
+                                                        
+                                                        rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                        
+                                                        rdfs:comment "The limit of an area used for distinctive types of maritime activities. Not a named feature.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Spillway
+
+<http://cegis.usgs.gov/NHDOntology/Spillway> rdf:type owl:Class ;
+                                             
+                                             rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                             
+                                             rdfs:comment "A constructed passage for surplus water to run over or around a dam. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SpillwayElevation
+
+<http://cegis.usgs.gov/NHDOntology/SpillwayElevation> rdf:type owl:Class ;
+                                                      
+                                                      rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                      
+                                                      rdfs:comment "The stage of an artificially impounded water body as determined by the spillway."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SpoilArea
+
+<http://cegis.usgs.gov/NHDOntology/SpoilArea> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                              
+                                              rdfs:comment "For the disposal of material obtained by dredging"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SpringOrSeep
+
+<http://cegis.usgs.gov/NHDOntology/SpringOrSeep> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                 
+                                                 rdfs:comment "A place where water issues from the ground naturally. May be a named feature.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Stormwater
+
+<http://cegis.usgs.gov/NHDOntology/Stormwater> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "Designed to convey stormwater through and from a drainage area. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/StreamOrRiver
+
+<http://cegis.usgs.gov/NHDOntology/StreamOrRiver> rdf:type owl:Class ;
+                                                  
+                                                  rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                  
+                                                  rdfs:comment "A body of flowing water. StreamRiver also exists as an NHDArea. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SubmergedStream
+
+<http://cegis.usgs.gov/NHDOntology/SubmergedStream> rdf:type owl:Class ;
+                                                    
+                                                    rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                    
+                                                    rdfs:comment "The original river course inundated by an impounded water body. These are mostly used in drowned river systems like the Tennessee Valley Authority (TVA) lakes. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SwampOrMarsh
+
+<http://cegis.usgs.gov/NHDOntology/SwampOrMarsh> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                 
+                                                 rdfs:comment "A noncultivated, vegetated area that is inundated or saturated for a significant part of the year.  The vegetation is adapted for life in saturated soil conditions. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/SwimmingPool
+
+<http://cegis.usgs.gov/NHDOntology/SwimmingPool> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Treatment
+
+<http://cegis.usgs.gov/NHDOntology/Treatment> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                              
+                                              rdfs:comment "For treatment."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/TreatmentCoolingPond
+
+<http://cegis.usgs.gov/NHDOntology/TreatmentCoolingPond> rdf:type owl:Class ;
+                                                         
+                                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/TreatmentFiltrationPond
+
+<http://cegis.usgs.gov/NHDOntology/TreatmentFiltrationPond> rdf:type owl:Class ;
+                                                            
+                                                            rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/TreatmentSettlingPond
+
+<http://cegis.usgs.gov/NHDOntology/TreatmentSettlingPond> rdf:type owl:Class ;
+                                                          
+                                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/TreatmentSewageTreatmentPond
+
+<http://cegis.usgs.gov/NHDOntology/TreatmentSewageTreatmentPond> rdf:type owl:Class ;
+                                                                 
+                                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Tunnel
+
+<http://cegis.usgs.gov/NHDOntology/Tunnel> rdf:type owl:Class ;
+                                           
+                                           rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                           
+                                           rdfs:comment "An underground or underwater passage that carries water bearing features such as CanalDitch or Pipeline. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Underground
+
+<http://cegis.usgs.gov/NHDOntology/Underground> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                
+                                                rdfs:comment "Buried"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/UndergroundConduit
+
+<http://cegis.usgs.gov/NHDOntology/UndergroundConduit> rdf:type owl:Class ;
+                                                       
+                                                       rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                       
+                                                       rdfs:comment "A set of naturally occurring subsurface drainage channels formed from the dissolution of soluble rocks in Karst terrain or in terrain similar to karst but formed in nonsoluble rocks, as by melting of permafrost or ground ice, collapse after mining, and by outflow of liquid lava from beneath its solidified crust. Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Underwater
+
+<http://cegis.usgs.gov/NHDOntology/Underwater> rdf:type owl:Class ;
+                                               
+                                               rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                               
+                                               rdfs:comment "Always submerged."^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Unspecified
+
+<http://cegis.usgs.gov/NHDOntology/Unspecified> rdf:type owl:Class ;
+                                                
+                                                rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                
+                                                rdfs:comment "The value is not known and is not required"^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Wall
+
+<http://cegis.usgs.gov/NHDOntology/Wall> rdf:type owl:Class ;
+                                         
+                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                         
+                                         rdfs:comment "An upright structure of masonry, wood, plaster, or other building material serving to separate land from water with no additional structures present. If other  associated structures, such as DamWeir, are present use Nonearthen Shore. Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Wash
+
+<http://cegis.usgs.gov/NHDOntology/Wash> rdf:type owl:Class ;
+                                         
+                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                         
+                                         rdfs:comment "The usually dry portion of a stream bed that contains water only during or after a local rainstorm or heavy snowmelt. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Water
+
+<http://cegis.usgs.gov/NHDOntology/Water> rdf:type owl:Class ;
+                                          
+                                          rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/WaterIntakeOrOutflow
+
+<http://cegis.usgs.gov/NHDOntology/WaterIntakeOrOutflow> rdf:type owl:Class ;
+                                                         
+                                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                                         
+                                                         rdfs:comment "A structure through which water enters or exits through a divergence structure. Water Intake/Outflow also exists as an NHDArea. Not a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/WaterStorage
+
+<http://cegis.usgs.gov/NHDOntology/WaterStorage> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeatureAttributes> ;
+                                                 
+                                                 rdfs:comment "For long or short-term storage of water.  "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Waterfall
+
+<http://cegis.usgs.gov/NHDOntology/Waterfall> rdf:type owl:Class ;
+                                              
+                                              rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                              
+                                              rdfs:comment "A vertical or near vertical descent of water over a step or ledge in the bed of a river. Waterfall also exists as an NHDLine. May be a named feature. "^^xsd:string .
+
+
+
+###  http://cegis.usgs.gov/NHDOntology/Well
+
+<http://cegis.usgs.gov/NHDOntology/Well> rdf:type owl:Class ;
+                                         
+                                         rdfs:subClassOf <http://cegis.usgs.gov/NHDOntology/NHDFeature> ;
+                                         
+                                         rdfs:comment "A pit or hole dug or bored into the earth for the extraction of oil, water, other fluids, or gases. May be a named feature. "^^xsd:string .
+
+
+
+
+###  Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net
+
