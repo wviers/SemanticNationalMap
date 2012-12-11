@@ -835,7 +835,7 @@ def ftype_to_rdftype(ftype):
     rdftype = ftypes.get(ftype[:3], None)
 
     if rdftype == None:
-        print("Couldn't find rdf type!")
+        #print("Couldn't find rdf type!")
         return ''
 
     else:
@@ -923,7 +923,7 @@ def InsertFeature(feature, model, output_file):
 
 def InsertLayer(layer, output_file):
     if layer.getName() in layer_models:
-        print('  Model found')
+        #print('  Model found')
         model = layer_models[layer.getName()]
         for feature in layer:
             InsertFeature(feature, model, output_file)
@@ -934,19 +934,19 @@ def nm_mdb_to_n3(inputFile, outputFile):
     o = open(outputFile, 'w')
     
     if f.exists() == False:
-        print("Error opening file.")
+        #print("Error opening file.")
         return False
     try:
         d = Database.open(f)
     except IOException:
-        print("Error opening database.")
+        #print("Error opening database.")
         return False
 
     for table in d:
-        print('Processing table: ' + table.getName())
+        #print('Processing table: ' + table.getName())
         InsertLayer(table, o)
 
-    print('All tables processed')
+    #print('All tables processed')
     o.close()
 
     return True
